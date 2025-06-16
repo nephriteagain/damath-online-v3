@@ -18,7 +18,8 @@ export function getInitialPiecesToBoard(pieces: string[]) {
       },
       color: p.color,
       value: pieces[i],
-      pieceName: `${p.color}|${pieces[i]}`
+      pieceName: `${p.color}|${pieces[i]}`,
+      isKing: false
     } as const
     piecesWithPosition.push(piece)
   }

@@ -127,7 +127,11 @@ export default function Box({ position, color, operation }: BoxProps) {
       <BoxGeometry 
         args={[1, 1, 0.2]} 
         onClick={() => {
-         movePiece(coordinates)}
+          // this means that the Box is not playable
+          if (!operation) {
+            return;
+          }
+          movePiece(coordinates)}
         }  
         userData={{ operation, coordinates, color, position }} 
     >

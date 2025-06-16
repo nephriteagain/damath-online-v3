@@ -10,4 +10,12 @@ export type PieceType = {
     value: string;
     pieceName: `${PieceType["color"]}|${PieceType["value"]}`;
     coordinates: Coordinates
+    isKing: boolean;
+}
+
+export enum DIRECTION {
+    "TR",
+    "TL",
+    "BR",
+    "BL"
 }

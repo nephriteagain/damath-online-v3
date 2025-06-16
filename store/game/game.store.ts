@@ -10,7 +10,7 @@ const initialCountingPieces = getInitialPiecesToBoard(COUNTING_PIECES)
 type GameStoreState = {
     selectedPiece: string|null;
     hoveredPiece: string|null;
-    activePieces: PieceType[]
+    activePieces: PieceType[];
     
 }
 
