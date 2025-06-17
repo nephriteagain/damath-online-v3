@@ -32,6 +32,7 @@ export function movePiece(coordinates: Coordinates) {
     
     gameSelector.setState({
         activePieces: updatedPieces,
-        selectedPiece: null
+        selectedPiece: null,
+        selectedPieceAvailableActions: []
     })
 }

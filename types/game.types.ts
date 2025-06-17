@@ -19,3 +19,8 @@ export enum DIRECTION {
     "BR",
     "BL"
 }
+
+export enum PIECE_ACTION {
+    "MOVE",
+    "JUMP"
+}

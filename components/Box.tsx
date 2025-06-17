@@ -19,7 +19,9 @@ type BoxProps = {
 };
 
 export default function Box({ position, color, operation }: BoxProps) {
-  const baseColor = useMemo(() => color === "DARK" ? 0x000000 : 0xffffff, [color])
+  
+  const selectedPieceAvailableActions = gameSelector.use.selectedPieceAvailableActions();
+  const activePieces = gameSelector.use.activePieces();
 
   const coordinates = useMemo(() => {
     const p = COORDINATES_TO_POSITION.find(c => c.position[0] === position[0] && c.position[1] === position[1])
@@ -29,12 +31,25 @@ export default function Box({ position, color, operation }: BoxProps) {
     return p?.coordinates
   }, [position])
 
+  const isPieceCanMoveInThisBox = useMemo(() => {
+    return selectedPieceAvailableActions.some(a => a.coordinates.x === coordinates.x && a.coordinates.y === coordinates.y)
+  }, [coordinates, selectedPieceAvailableActions])
+
+  const baseColor = useMemo(() => {
+    if (color === "DARK") {
+      return 0x000000;
+    }
+    if (isPieceCanMoveInThisBox) {
+      return 0x00ff00
+    }
+    return 0xffffff
+  }, [color, isPieceCanMoveInThisBox])
+
   
-  const activePieces = gameSelector.use.activePieces();
 
   const hasPieceOnTop = useMemo(() => {
     return Boolean(activePieces.find(piece => piece.coordinates.x === coordinates.x && piece.coordinates.y === coordinates.y))
-  }, [activePieces])
+  }, [activePieces, coordinates])
 
   
 
@@ -120,19 +135,26 @@ export default function Box({ position, color, operation }: BoxProps) {
   }, [operation, hasPieceOnTop]);
 
 
+  function handleMovePiece() {
+      
+      // this means that the Box is not playable
+      if (!operation) {
+        return;
+      }         
+      const isValidCoordinates = selectedPieceAvailableActions.some(a => a.coordinates.x === coordinates.x && a.coordinates.y === coordinates.y);
+      if (!isValidCoordinates) {
+        // ignore invalid moves
+        return;
+      }
+      movePiece(coordinates)
+  }
 
 
   return (
     <group position={position} name="box">
       <BoxGeometry 
         args={[1, 1, 0.2]} 
-        onClick={() => {
-          // this means that the Box is not playable
-          if (!operation) {
-            return;
-          }
-          movePiece(coordinates)}
-        }  
+        onClick={handleMovePiece} 
         userData={{ operation, coordinates, color, position }} 
     >
         <meshBasicMaterial attach="material" color={baseColor} />

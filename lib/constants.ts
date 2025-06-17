@@ -10,6 +10,7 @@ export enum OPERATION {
   DIVIDE = "DIVIDE",
 }
 
+/** left to right from 0-7 to 7-0  */
 export const BOARD_OPERATIONS: (OPERATION | null)[] = [
 
   OPERATION.MULTIPLY, null,    OPERATION.DIVIDE, null, OPERATION.SUBTRACT, null,   OPERATION.ADD, null,
@@ -26,7 +27,7 @@ export const BOARD_OPERATIONS: (OPERATION | null)[] = [
 
   OPERATION.SUBTRACT, null,   OPERATION.ADD, null, OPERATION.MULTIPLY, null,      OPERATION.DIVIDE, null,
 
-  null, OPERATION.ADD, null,   OPERATION.SUBTRACT, null, OPERATION.MULTIPLY, null,      OPERATION.MULTIPLY,
+  null, OPERATION.ADD, null,   OPERATION.SUBTRACT, null, OPERATION.DIVIDE, null,      OPERATION.MULTIPLY,
 
 ];
 

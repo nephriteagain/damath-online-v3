@@ -4,8 +4,9 @@ import { Mesh, Vector3 } from "three";
 import { Text } from "@react-three/drei";
 import { gameSelector } from "@/store/game/game.store";
 import { COORDINATES_TO_POSITION } from "@/lib/constants";
-import { PieceType } from "@/types/game.types";
+import { PIECE_ACTION, PieceType } from "@/types/game.types";
 import { Group } from "three";
+import { useBoardContext } from "@/provider/BoardProvider";
 
 type PieceProps = ThreeElements["mesh"] & PieceType;
 
@@ -43,6 +44,21 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
     }
   });
 
+  const board = useBoardContext()
+
+  function selectPiece() {
+    if (isSelected) {
+      gameSelector.setState({selectedPiece: null, selectedPieceAvailableActions: []})
+    } else {
+      const box = board.getBoxNode(coordinates)
+      const moves = box.checkAvailableMoves();
+      gameSelector.setState({ 
+        selectedPiece: pieceName,
+        selectedPieceAvailableActions: moves.map(m => ({coordinates: m, type: PIECE_ACTION.MOVE})) 
+      });
+    }
+  }
+
   return (
     <group ref={groupRef}>
       <mesh
@@ -50,13 +66,7 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
         rotation={[Math.PI / 2, 0, 0]}
         name="piece"
         userData={{ color, value, pieceName, coordinates }}
-        onClick={() => {
-          if (isSelected) {
-            gameSelector.setState({selectedPiece: null})
-          } else {
-            gameSelector.setState({ selectedPiece: pieceName });
-          }
-        }}
+        onClick={selectPiece}
         castShadow
       >
         <cylinderGeometry args={[0.4, 0.4, 0.1, 32]} />

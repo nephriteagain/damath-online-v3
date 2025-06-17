@@ -24,12 +24,12 @@ function Scene() {
   const { scene, camera, } = useThree();
 
   const activePieces = gameSelector.use.activePieces();
-  
 
   useEffect(() => {
     scene.background = new THREE.Color(0xEFE4D2);
     camera.lookAt(0, 0, 0);
   }, []);
+
 
 
   return (
