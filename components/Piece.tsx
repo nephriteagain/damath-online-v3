@@ -52,6 +52,15 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
     } else {
       const box = board.getBoxNode(coordinates)
       const moves = box.checkAvailableMoves();
+      const jumps = box.checkAvailableJumps();
+      if (jumps.length > 0) {
+        console.log("HAS JUMP")
+        gameSelector.setState({
+          selectedPiece: pieceName,
+          selectedPieceAvailableActions: jumps.map(j => ({coordinates: j.coordinates, pieceToCapture: j.pieceToCapture, type: PIECE_ACTION.JUMP}))
+        })
+        return
+      }
       gameSelector.setState({ 
         selectedPiece: pieceName,
         selectedPieceAvailableActions: moves.map(m => ({coordinates: m, type: PIECE_ACTION.MOVE})) 

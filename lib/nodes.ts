@@ -26,6 +26,7 @@ export class BoxNode {
       this.piece = piece
     }
 
+    /** used for normal chips */
     private checkMove(box: BoxNode|null, moves: Coordinates[]) {
       if (!box || box.piece) {
         return;
@@ -33,6 +34,7 @@ export class BoxNode {
       moves.push(box.coordinates)
     }
 
+    /** use for king chips */
     private checkMoveRecursive(box: BoxNode | null,moves: Coordinates[], direction: DIRECTION) {
       // terminate recursion
       if (!box || box.piece) {
@@ -82,14 +84,70 @@ export class BoxNode {
       return moves
     }
 
+    /** used for normal chips */
+    private checkJumps(box: BoxNode|null, jumps: {coordinates: Coordinates; pieceToCapture: PieceType}[], direction: DIRECTION) {
+      if (!this.piece) return;
+      // the box has no piece or
+      // the box piece has a same color piece next to it
+      if (!box?.piece || box.piece?.color ===  this.piece.color) {
+        return;
+      }
+      // the box has a piece of opposite color and the next box is empty
+      if (
+        direction === DIRECTION.TL 
+        && box.tl
+        && !box.tl?.piece
+      ) {
+        jumps.push({
+          pieceToCapture: box.piece,
+          coordinates: box.tl.coordinates
+        })
+      }
+      if (
+        direction === DIRECTION.TR
+        && box.tr
+        && !box.tr?.piece
+      ) {
+        jumps.push({
+          pieceToCapture: box.piece,
+          coordinates: box.tr.coordinates
+        })
+      }
+      if (
+        direction === DIRECTION.BL
+        && box.bl
+        && !box.bl?.piece
+      ) {
+        jumps.push({
+          pieceToCapture: box.piece,
+          coordinates: box.bl.coordinates
+        })
+      }
+      if (
+        direction === DIRECTION.BR
+        && box.br
+        && !box.br?.piece
+      ) {
+        jumps.push({
+          pieceToCapture: box.piece,
+          coordinates: box.br.coordinates
+        })
+      }
+    }
+
     checkAvailableJumps() {
       const jumps: {coordinates: Coordinates; pieceToCapture: PieceType}[] = []
       const currentPiece = this.piece;
       if (!currentPiece) {
         throw new Error("no current piece to jump")
       }
+      // for normal piece
       if (!currentPiece.isKing) {
-
+        // single jump
+        this.checkJumps(this.tl ?? null, jumps, DIRECTION.TL)
+        this.checkJumps(this.tr ?? null, jumps, DIRECTION.TR)
+        this.checkJumps(this.bl ?? null, jumps, DIRECTION.BL)
+        this.checkJumps(this.br ?? null, jumps, DIRECTION.BR)
       } else {
         
       }
