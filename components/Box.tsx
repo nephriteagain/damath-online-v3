@@ -146,7 +146,13 @@ export default function Box({ position, color, operation }: BoxProps) {
         // ignore invalid moves
         return;
       }
-      movePiece(coordinates)
+      const capturedPiece = selectedPieceAvailableActions.find(p => p.coordinates.x === coordinates.x && p.coordinates.y === coordinates.y)?.pieceToCapture
+
+      if (capturedPiece) {
+        movePiece(coordinates, capturedPiece)
+      } else {
+        movePiece(coordinates)
+      }
   }
 
 

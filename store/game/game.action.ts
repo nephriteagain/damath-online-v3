@@ -1,8 +1,8 @@
-import { Coordinates } from "@/types/game.types";
+import { Coordinates, PieceType } from "@/types/game.types";
 import { gameSelector } from "./game.store";
 
 
-export function movePiece(coordinates: Coordinates) {
+export function movePiece(coordinates: Coordinates, capturedPiece?: PieceType) {
     const selectedPiece = gameSelector.getState().selectedPiece
     // no piece selected
     if (!selectedPiece) {
@@ -20,7 +20,8 @@ export function movePiece(coordinates: Coordinates) {
         return
     }
 
-    const updatedPieces = pieces.map(p => {
+
+    let updatedPieces = pieces.map(p => {
         if (selectedPiece === p.pieceName) {
             return {
                 ...p,
@@ -29,6 +30,11 @@ export function movePiece(coordinates: Coordinates) {
         }
         return p
     })
+
+    // remove captured piece
+    if (capturedPiece) {
+        updatedPieces = updatedPieces.filter(p => p.pieceName !== capturedPiece.pieceName)
+    }
     
     gameSelector.setState({
         activePieces: updatedPieces,

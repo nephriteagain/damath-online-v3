@@ -6,21 +6,12 @@ import { Coordinates, PIECE_ACTION, PieceType } from "@/types/game.types";
 
 const initialCountingPieces = getInitialPiecesToBoard(COUNTING_PIECES)
 
-
-type SelectedPieceAvailableMoves = {
-    type: PIECE_ACTION.MOVE,
-    coordinates: Coordinates   
-}
-
-type SelectedPieceAvailableJumps = {
-    type: PIECE_ACTION.JUMP,
+type SelectedPieceAvailableActions = {
+    type: PIECE_ACTION;
     coordinates: Coordinates;
-    pieceToCapture: PieceType;
-    // used for multi capture
-    extraJumps?: SelectedPieceAvailableJumps[];
+    pieceToCapture?: PieceType
+    extraJumps?: SelectedPieceAvailableActions[]
 }
-
-type SelectedPieceAvailableActions = SelectedPieceAvailableMoves|SelectedPieceAvailableJumps
 
 
 type GameStoreState = {
