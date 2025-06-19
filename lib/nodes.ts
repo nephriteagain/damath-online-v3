@@ -136,7 +136,7 @@ export class BoxNode {
     }
 
     checkAvailableJumps() {
-      const jumps: {coordinates: Coordinates; pieceToCapture: PieceType}[] = []
+      const jumps: {coordinates: Coordinates; pieceToCapture: PieceType;}[] = []
       const currentPiece = this.piece;
       if (!currentPiece) {
         throw new Error("no current piece to jump")

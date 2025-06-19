@@ -3,14 +3,14 @@ import { ThreeElements, useFrame } from "@react-three/fiber";
 import { Mesh, Vector3 } from "three";
 import { Text } from "@react-three/drei";
 import { gameSelector } from "@/store/game/game.store";
-import { COORDINATES_TO_POSITION } from "@/lib/constants";
+import {  COORDINATES_TO_POSITION } from "@/lib/constants";
 import { PIECE_ACTION, PieceType } from "@/types/game.types";
 import { Group } from "three";
 import { useBoardContext } from "@/provider/BoardProvider";
 
 type PieceProps = ThreeElements["mesh"] & PieceType;
 
-const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
+const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => {
   const meshRef = useRef<Mesh>(null);
   const groupRef = useRef<Group>(null);
 
@@ -25,6 +25,7 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
   );
 
   const selectedPiece = gameSelector.use.selectedPiece();
+  const playerTurn = gameSelector.use.playerTurnColor();
 
   if (!p) {
     throw new Error("Piece not found!");
@@ -47,6 +48,9 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
   const board = useBoardContext()
 
   function selectPiece() {
+    if (playerTurn !== color) {
+      return;
+    }
     if (isSelected) {
       gameSelector.setState({selectedPiece: null, selectedPieceAvailableActions: []})
     } else {
@@ -68,6 +72,7 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
     }
   }
 
+
   return (
     <group ref={groupRef}>
       <mesh
@@ -78,7 +83,7 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
         onClick={selectPiece}
         castShadow
       >
-        <cylinderGeometry args={[0.4, 0.4, 0.1, 32]} />
+        <cylinderGeometry args={[0.4, 0.4, isKing ? 0.3 : 0.1, 32]} />
         <meshBasicMaterial
           color={
             isSelected
@@ -91,10 +96,27 @@ const Piece = ({ color, value, pieceName, coordinates }: PieceProps) => {
           }
         />
       </mesh>
+      
+      {isKing && (
+        <mesh position={[0, 0, 0.1]}>
+          <torusGeometry args={[0.40, 0.05, 16, 100]} />
+          <meshStandardMaterial color="gold" />
+        </mesh>
+      )}
+
+      {isKing && (
+        <Text
+          position={[0, 0.25, 0.06 + (isKing ? 0.1 : 0 ),]} // local to group
+          fontSize={0.2}
+          color="gold"
+          anchorX="center"
+          anchorY="middle"
+        >♔</Text>
+      )}
 
       {value && (
         <Text
-          position={[0, 0, 0.06]} // local to group
+          position={[0, 0, 0.06 + (isKing ? 0.1 : 0 ),]} // local to group
           fontSize={0.5}
           color="#fff"
           anchorX="center"

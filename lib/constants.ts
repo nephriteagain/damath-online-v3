@@ -197,3 +197,16 @@ export const COUNTING_PIECES = [
   "6",
   "3"
 ]
+
+export const RED_KING_COORDINATES = [
+  {x: 0, y: 7},
+  {x: 2, y: 7},
+  {x: 4, y: 7},
+  {x: 6, y: 7},
+]
+export const BLUE_KING_COORDINATES = [
+  {x: 1, y: 0},
+  {x: 3, y: 0},
+  {x: 5, y: 0},
+  {x: 7, y: 0},
+]
