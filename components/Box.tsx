@@ -149,9 +149,9 @@ export default function Box({ position, color, operation }: BoxProps) {
       const capturedPiece = selectedPieceAvailableActions.find(p => p.coordinates.x === coordinates.x && p.coordinates.y === coordinates.y)?.pieceToCapture
 
       if (capturedPiece) {
-        movePiece(coordinates, capturedPiece)
+        movePiece(coordinates, operation, capturedPiece)
       } else {
-        movePiece(coordinates)
+        movePiece(coordinates, operation)
       }
   }
 

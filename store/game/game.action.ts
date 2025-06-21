@@ -1,9 +1,13 @@
 import { Coordinates, PieceType } from "@/types/game.types";
 import { gameSelector } from "./game.store";
-import { COLOR, BLUE_KING_COORDINATES, RED_KING_COORDINATES } from "@/lib/constants";
+import { COLOR, BLUE_KING_COORDINATES, RED_KING_COORDINATES, GAME_TYPE, operationToSymbol } from "@/lib/constants";
+import * as math from "mathjs"
+import { OPERATION } from "@/components/Box";
 
+window.math = math
 
-export function movePiece(coordinates: Coordinates, capturedPiece?: PieceType) {
+export function movePiece(coordinates: Coordinates, operation: OPERATION, capturedPiece?: PieceType) {
+
     const selectedPiece = gameSelector.getState().selectedPiece
     // no piece selected
     if (!selectedPiece) {
@@ -43,7 +47,8 @@ export function movePiece(coordinates: Coordinates, capturedPiece?: PieceType) {
         activePieces: updatedPieces,
         selectedPiece: null,
         selectedPieceAvailableActions: [],
-        playerTurnColor: state.playerTurnColor === COLOR.RED ? COLOR.BLUE : COLOR.RED
+        playerTurnColor: state.playerTurnColor === COLOR.RED ? COLOR.BLUE : COLOR.RED,
+        scores: capturedPiece ? updateScores(pieceObject, capturedPiece, operation, pieceObject.isKing): state.scores
     }))
 }
 
@@ -58,5 +63,28 @@ export function checkAndPromoteNewKing(piece:PieceType, newCoordinates: Coordina
         const pieceIsInKingCoordinates = BLUE_KING_COORDINATES.some(k => k.x === newCoordinates.x && k.y === newCoordinates.y)
         return pieceIsInKingCoordinates
     }
+
+}
+
+function updateScores(jumpPieceValue: PieceType, capturedPieceValue : PieceType, operation: OPERATION, isJumpPieceKing: boolean) {
+    const gameType = gameSelector.getState().gameType;
+    const symbol = operationToSymbol[operation]
+    if (!symbol) {
+        throw new Error("invalid operation")
+    }
+    const scores = gameSelector.getState().scores;
+    const currentPlayerColor = gameSelector.getState().playerTurnColor;
+    const currentPlayerScore =  scores[currentPlayerColor === COLOR.RED ? "red" : "blue"]
+
+    if (gameType === GAME_TYPE.COUNTING || gameType === GAME_TYPE.WHOLE || gameType === GAME_TYPE.INTEGER) {
+        const result = math.evaluate(`(${jumpPieceValue.value} ${symbol} ${capturedPieceValue.value}) * ${isJumpPieceKing ? 2 : 1}`)
+        const newScores = math.evaluate(`${currentPlayerScore} + ${result.toFixed(2)}`)
+        return {
+            red: currentPlayerColor === COLOR.RED ? newScores.toFixed(2) : scores.red,
+            blue: currentPlayerColor === COLOR.BLUE ? newScores.toFixed(2) : scores.blue,
+        }
+    }
+
+    throw new Error("unhandled game type.")
 
 }

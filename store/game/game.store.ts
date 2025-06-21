@@ -1,7 +1,7 @@
 import createSelector from "../createSelector";
 import { create } from "zustand";
 import { getInitialPiecesToBoard } from "@/lib/utils";
-import { COLOR, COUNTING_PIECES } from "@/lib/constants";
+import { COLOR, COUNTING_PIECES, GAME_TYPE } from "@/lib/constants";
 import { Coordinates, PIECE_ACTION, PieceType } from "@/types/game.types";
 
 const initialCountingPieces = getInitialPiecesToBoard(COUNTING_PIECES)
@@ -22,7 +22,8 @@ type GameStoreState = {
     scores: {
         red: string;
         blue: string;
-    }
+    };
+    gameType: GAME_TYPE
 }
 
 export const authInitialState: GameStoreState = {
@@ -33,7 +34,8 @@ export const authInitialState: GameStoreState = {
     scores: {
         red: "0",
         blue: "0"
-    }
+    },
+    gameType: GAME_TYPE.COUNTING
 }
 
 

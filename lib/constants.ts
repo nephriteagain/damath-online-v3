@@ -210,3 +210,19 @@ export const BLUE_KING_COORDINATES = [
   {x: 5, y: 0},
   {x: 7, y: 0},
 ]
+
+export enum GAME_TYPE {
+  "COUNTING",
+  "WHOLE",
+  "INTEGER",
+  "FRACTION",
+  "RATIONAL",
+  "RADICAL"
+}
+
+export const operationToSymbol = {
+  [OPERATION.ADD]: "+",
+  [OPERATION.SUBTRACT]: "-",
+  [OPERATION.MULTIPLY]: "*",
+  [OPERATION.DIVIDE]: "/",
+}

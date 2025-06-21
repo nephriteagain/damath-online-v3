@@ -24,7 +24,6 @@ export default function ScoreBoard() {
                 >
                     SCOREBOARD
                 </Text>
-                <mesh>
                 <Text
                     position={[0, -0.05, 0.1 + 0.06]}
                     fontSize={0.3}
@@ -35,7 +34,6 @@ export default function ScoreBoard() {
                     >
                     {playerTurnColor} TURN
                 </Text>
-                </mesh>
                 <Text
                     position={[-3.2, 0, 0.1 + 0.06]}
                     fontSize={0.4}
