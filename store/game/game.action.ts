@@ -78,7 +78,14 @@ function updateScores(jumpPieceValue: PieceType, capturedPieceValue : PieceType,
 
     if (gameType === GAME_TYPE.COUNTING || gameType === GAME_TYPE.WHOLE || gameType === GAME_TYPE.INTEGER) {
         const result = math.evaluate(`(${jumpPieceValue.value} ${symbol} ${capturedPieceValue.value}) * ${isJumpPieceKing ? 2 : 1}`)
-        const newScores = math.evaluate(`${currentPlayerScore} + ${result.toFixed(2)}`)
+        let newScores = math.evaluate(`${currentPlayerScore} + ${result.toFixed(2)}`)
+        if (newScores === Infinity || newScores === -Infinity) {
+            newScores = 0
+        }
+        if (isNaN(newScores)) {
+            console.error("NEW NEW SCORE CANNOT BE NaN")
+            newScores = 0
+        }
         return {
             red: currentPlayerColor === COLOR.RED ? newScores.toFixed(2) : scores.red,
             blue: currentPlayerColor === COLOR.BLUE ? newScores.toFixed(2) : scores.blue,
