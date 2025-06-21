@@ -43,71 +43,82 @@
 
 :root {
   --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
+  
+  /* Light theme - Sage green palette */
+  --background: oklch(0.96 0.02 140); /* Very light sage background */
+  --foreground: oklch(0.25 0.05 150); /* Deep forest green text */
+  --card: oklch(0.98 0.01 140); /* Light sage card */
+  --card-foreground: oklch(0.25 0.05 150);
+  --popover: oklch(0.98 0.01 140);
+  --popover-foreground: oklch(0.25 0.05 150);
+  --primary: oklch(0.45 0.1 155); /* Medium forest green primary */
+  --primary-foreground: oklch(0.96 0.02 140);
+  --secondary: oklch(0.7 0.08 145); /* Light sage secondary */
+  --secondary-foreground: oklch(0.25 0.05 150);
+  --muted: oklch(0.88 0.04 142); /* Muted sage */
+  --muted-foreground: oklch(0.5 0.06 148);
+  --accent: oklch(0.8 0.06 138); /* Pale sage accent */
+  --accent-foreground: oklch(0.25 0.05 150);
+  --destructive: oklch(0.6 0.2 25); /* Warm red */
+  --border: oklch(0.85 0.05 142);
+  --input: oklch(0.92 0.03 140);
+  --ring: oklch(0.45 0.1 155);
+  
+  /* Chart colors using the green palette */
+  --chart-1: oklch(0.45 0.1 155); /* Deep sage */
+  --chart-2: oklch(0.55 0.08 150); /* Medium sage */
+  --chart-3: oklch(0.7 0.08 145); /* Light sage */
+  --chart-4: oklch(0.8 0.06 138); /* Pale sage */
+  --chart-5: oklch(0.35 0.12 160); /* Forest green */
+  
+  /* Sidebar colors */
+  --sidebar: oklch(0.94 0.03 140);
+  --sidebar-foreground: oklch(0.25 0.05 150);
+  --sidebar-primary: oklch(0.45 0.1 155);
+  --sidebar-primary-foreground: oklch(0.96 0.02 140);
+  --sidebar-accent: oklch(0.88 0.04 142);
+  --sidebar-accent-foreground: oklch(0.25 0.05 150);
+  --sidebar-border: oklch(0.85 0.05 142);
+  --sidebar-ring: oklch(0.45 0.1 155);
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
+  /* Dark theme - Deep sage greens */
+  --background: oklch(0.18 0.04 150); /* Deep forest background */
+  --foreground: oklch(0.94 0.02 140); /* Light sage text */
+  --card: oklch(0.25 0.05 148); /* Dark sage card */
+  --card-foreground: oklch(0.94 0.02 140);
+  --popover: oklch(0.25 0.05 148);
+  --popover-foreground: oklch(0.94 0.02 140);
+  --primary: oklch(0.8 0.06 138); /* Pale sage primary */
+  --primary-foreground: oklch(0.18 0.04 150);
+  --secondary: oklch(0.35 0.06 152); /* Medium dark sage secondary */
+  --secondary-foreground: oklch(0.94 0.02 140);
+  --muted: oklch(0.3 0.05 150); /* Dark muted sage */
+  --muted-foreground: oklch(0.75 0.06 142);
+  --accent: oklch(0.55 0.08 150); /* Medium sage accent */
+  --accent-foreground: oklch(0.18 0.04 150);
+  --destructive: oklch(0.65 0.18 25); /* Warm red */
+  --border: oklch(0.28 0.04 148);
+  --input: oklch(0.22 0.04 150);
+  --ring: oklch(0.8 0.06 138);
+  
+  /* Dark chart colors */
+  --chart-1: oklch(0.8 0.06 138); /* Pale sage */
+  --chart-2: oklch(0.7 0.08 145); /* Light sage */
+  --chart-3: oklch(0.55 0.08 150); /* Medium sage */
+  --chart-4: oklch(0.45 0.1 155); /* Deep sage */
+  --chart-5: oklch(0.35 0.12 160); /* Forest green */
+  
+  /* Dark sidebar colors */
+  --sidebar: oklch(0.25 0.05 148);
+  --sidebar-foreground: oklch(0.94 0.02 140);
+  --sidebar-primary: oklch(0.8 0.06 138);
+  --sidebar-primary-foreground: oklch(0.18 0.04 150);
+  --sidebar-accent: oklch(0.3 0.05 150);
+  --sidebar-accent-foreground: oklch(0.94 0.02 140);
+  --sidebar-border: oklch(0.28 0.04 148);
+  --sidebar-ring: oklch(0.8 0.06 138);
 }
 
 @layer base {

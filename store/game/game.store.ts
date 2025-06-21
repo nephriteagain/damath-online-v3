@@ -17,15 +17,23 @@ type SelectedPieceAvailableActions = {
 type GameStoreState = {
     activePieces: PieceType[];
     selectedPiece: string|null;
-    selectedPieceAvailableActions: (SelectedPieceAvailableActions)[]
-    playerTurnColor: COLOR
+    selectedPieceAvailableActions: (SelectedPieceAvailableActions)[];
+    playerTurnColor: COLOR;
+    scores: {
+        red: string;
+        blue: string;
+    }
 }
 
 export const authInitialState: GameStoreState = {
     selectedPiece: null,
     activePieces: initialCountingPieces.map(p => ({...p, isKing: true})),
     selectedPieceAvailableActions: [],
-    playerTurnColor: COLOR.RED
+    playerTurnColor: COLOR.RED,
+    scores: {
+        red: "0",
+        blue: "0"
+    }
 }
 
 

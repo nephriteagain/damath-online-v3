@@ -2,12 +2,12 @@ import { ReactNode } from "react";
 import Box from "./Box";
 import { BOXES } from "@/lib/constants";
 
-
 export default function Board({children}:{children?:ReactNode}) {
   const boardColor = 0x5a827e;
   const boxZ = 0.4
 
   return (
+    <>
     <group name="board-group">
       {/* Board platform */}
       <mesh position={[0, 0, 0]} name="board">
@@ -26,5 +26,6 @@ export default function Board({children}:{children?:ReactNode}) {
       ))}
       {children}
     </group>
+    </>
   );
 }

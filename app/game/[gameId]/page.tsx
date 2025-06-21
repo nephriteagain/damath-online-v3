@@ -8,10 +8,13 @@ import Board from "@/components/Board";
 import Coordinates from "@/components/Coordinates";
 import Piece from "@/components/Piece";
 import { gameSelector } from "@/store/game/game.store";
+import GameOverDialog from "@/components/GameOverDialog";
+import ScoreBoard from "@/components/Scoreboard";
 
 export default function GamePage() {
   return (
     <main className="flex flex-col items-center justify-center w-screen h-screen">
+      <GameOverDialog />
       <Canvas shadows camera={{ position: [0, -0.5, 7], fov: 75 }}>
         <Scene />
       </Canvas>
@@ -39,6 +42,7 @@ function Scene() {
     <Board>
     {/* Add pieces to board */}
         <Coordinates />
+        <ScoreBoard />
         {
           activePieces.map(p => (
             <Piece key={p.pieceName} {...p} />
