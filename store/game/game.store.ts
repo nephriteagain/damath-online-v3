@@ -23,7 +23,7 @@ type GameStoreState = {
 
 export const authInitialState: GameStoreState = {
     selectedPiece: null,
-    activePieces: initialCountingPieces,
+    activePieces: initialCountingPieces.map(p => ({...p, isKing: true})),
     selectedPieceAvailableActions: [],
     playerTurnColor: COLOR.RED
 }

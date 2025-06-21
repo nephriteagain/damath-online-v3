@@ -16,6 +16,13 @@ export class BoxNode {
       this.operation = operation;
     }
 
+    private static d : Record<DIRECTION, "bl"|"br"|"tl"|"tr"> = {
+      [DIRECTION.BL] : "bl",
+      [DIRECTION.BR] : "br",
+      [DIRECTION.TL] : "tl",
+      [DIRECTION.TR] : "tr",
+    }
+
     /* this functions setups the box connections */
     addConnection(boxNode: BoxNode, location: "tr" | "tl" | "br" | "bl") {
         this[location] = boxNode
@@ -42,18 +49,22 @@ export class BoxNode {
       }
       moves.push(box.coordinates)
 
-      if (direction === DIRECTION.BL) {
-        this.checkMoveRecursive(this.bl ?? null, moves, direction)
-      }
-      if (direction === DIRECTION.BR) {
-        this.checkMoveRecursive(this.bl ?? null, moves, direction)
-      }
-      if (direction === DIRECTION.TL) {
-        this.checkMoveRecursive(this.bl ?? null, moves, direction)
-      }
-      if (direction === DIRECTION.TR) {
-        this.checkMoveRecursive(this.bl ?? null, moves, direction)
-      }
+      const nexBox = box[BoxNode.d[direction]]
+
+      this.checkMoveRecursive(nexBox ?? null, moves, direction)
+
+      // if (direction === DIRECTION.BL) {
+      //   this.checkMoveRecursive(box.bl ?? null, moves, direction)
+      // }
+      // if (direction === DIRECTION.BR) {
+      //   this.checkMoveRecursive(box.br ?? null, moves, direction)
+      // }
+      // if (direction === DIRECTION.TL) {
+      //   this.checkMoveRecursive(box.tl ?? null, moves, direction)
+      // }
+      // if (direction === DIRECTION.TR) {
+      //   this.checkMoveRecursive(box.tr ?? null, moves, direction)
+      // }
     }
 
     checkAvailableMoves() {
@@ -92,48 +103,88 @@ export class BoxNode {
       if (!box?.piece || box.piece?.color ===  this.piece.color) {
         return;
       }
+      const nextBox = box[BoxNode.d[direction]]
       // the box has a piece of opposite color and the next box is empty
-      if (
-        direction === DIRECTION.TL 
-        && box.tl
-        && !box.tl?.piece
-      ) {
+      if (nextBox && nextBox.piece) {
         jumps.push({
           pieceToCapture: box.piece,
-          coordinates: box.tl.coordinates
+          coordinates: nextBox.coordinates
         })
       }
-      if (
-        direction === DIRECTION.TR
-        && box.tr
-        && !box.tr?.piece
-      ) {
-        jumps.push({
-          pieceToCapture: box.piece,
-          coordinates: box.tr.coordinates
-        })
+
+
+    }
+
+    /** used for king pieces */
+    private checkAvailableMovesWithDirection() {
+      const currentPiece = this.piece;
+      if (!currentPiece) {
+        throw new Error("no current piece to move")
       }
-      if (
-        direction === DIRECTION.BL
-        && box.bl
-        && !box.bl?.piece
-      ) {
-        jumps.push({
-          pieceToCapture: box.piece,
-          coordinates: box.bl.coordinates
-        })
+      if (!currentPiece.isKing) {
+        throw new Error("Piece is not a King!")
       }
-      if (
-        direction === DIRECTION.BR
-        && box.br
-        && !box.br?.piece
-      ) {
-        jumps.push({
-          pieceToCapture: box.piece,
-          coordinates: box.br.coordinates
-        })
+      const movesBL : Coordinates[] = []
+      const movesBR : Coordinates[] = []
+      const movesTL : Coordinates[] = []
+      const movesTR : Coordinates[] = []
+      this.checkMoveRecursive(this.bl ?? null, movesBL, DIRECTION.BL)
+      this.checkMoveRecursive(this.br ?? null, movesBR, DIRECTION.BR)
+      this.checkMoveRecursive(this.tl ?? null, movesTL, DIRECTION.TL)
+      this.checkMoveRecursive(this.tr ?? null, movesTR, DIRECTION.TR)
+      
+      return {
+        tl: movesTL,
+        tr: movesTR,
+        bl: movesBL,
+        br: movesBR
       }
     }
+
+    private getAllFarthestMoves(moves: Coordinates[], direction: DIRECTION) : Coordinates|null {
+      if (direction === DIRECTION.TL || direction === DIRECTION.BL) {
+        moves.sort((m1, m2) => m1.x - m2.x)
+      }
+      if (direction === DIRECTION.TR || direction === DIRECTION.BR) {
+        moves.sort((m1, m2) => m2.x - m1.x)
+      }
+      return moves[0] ?? null;
+    }
+
+    private checkJumpsAsKing(initialBox: BoxNode, currentBox: BoxNode|null, jumpCoordinates: {coordinates:Coordinates, pieceToCapture:PieceType}[], pieceToCapture:PieceType|null, direction:DIRECTION) {
+      // react the edge of the box
+      if (!currentBox) return;
+
+      // encountered a non empty box with same color piece
+      if (currentBox.piece?.color === initialBox.piece?.color) {
+        return;
+      }
+
+      const nextBox = currentBox[BoxNode.d[direction]] ?? null
+
+      // if encountered a empty box, with no pieceToCapture
+      // continue looking
+      if (!currentBox?.piece && !pieceToCapture) {
+        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, null, direction)
+        return;
+      }
+
+      // encountered a piece to capture
+      // for the first time
+      if (initialBox.piece?.color !== currentBox.piece?.color && !pieceToCapture) {
+        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, currentBox.piece, direction)
+        return;
+      }
+
+      // encountered a empty box after encountered a captureable piece
+      if (!currentBox.piece && pieceToCapture) {
+        jumpCoordinates.push({coordinates: currentBox.coordinates, pieceToCapture})
+        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, pieceToCapture, direction)
+        return;
+      }
+      
+    }
+
 
     checkAvailableJumps() {
       const jumps: {coordinates: Coordinates; pieceToCapture: PieceType;}[] = []
@@ -149,7 +200,10 @@ export class BoxNode {
         this.checkJumps(this.bl ?? null, jumps, DIRECTION.BL)
         this.checkJumps(this.br ?? null, jumps, DIRECTION.BR)
       } else {
-        
+        this.checkJumpsAsKing(this, this.tr ?? null, jumps, null, DIRECTION.TR)
+        this.checkJumpsAsKing(this, this.tl ?? null, jumps, null, DIRECTION.TL)
+        this.checkJumpsAsKing(this, this.br ?? null, jumps, null, DIRECTION.BR)
+        this.checkJumpsAsKing(this, this.bl ?? null, jumps, null, DIRECTION.BL)
       }
       return jumps
     }
