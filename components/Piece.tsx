@@ -3,7 +3,7 @@ import { ThreeElements, useFrame } from "@react-three/fiber";
 import { Mesh, Vector3 } from "three";
 import { Text } from "@react-three/drei";
 import { gameSelector } from "@/store/game/game.store";
-import {  COORDINATES_TO_POSITION } from "@/lib/constants";
+import { COLOR, COORDINATES_TO_POSITION } from "@/lib/constants";
 import { PIECE_ACTION, PieceType } from "@/types/game.types";
 import { Group } from "three";
 import { useBoardContext } from "@/provider/BoardProvider";
@@ -26,6 +26,7 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
 
   const selectedPiece = gameSelector.use.selectedPiece();
   const playerTurn = gameSelector.use.playerTurnColor();
+  const pieceWithForceCapture = gameSelector.use.pieceWithForceCapture();
 
   if (!p) {
     throw new Error("Piece not found!");
@@ -47,7 +48,21 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
 
   const board = useBoardContext()
 
+ 
+
+  const isDisabled = useMemo(() => {
+    if (pieceWithForceCapture.length === 0) return false;
+    if (playerTurn !== color) return false;
+    // this piece is included in the force move
+    if (pieceWithForceCapture.some(p => p.pieceName === pieceName)) return false
+    // disables the piece is not included in pieceWithForceCapture array
+    return true
+  }, [pieceWithForceCapture, playerTurn])
+
   function selectPiece() {
+    if (isDisabled) {
+      return;
+    }
     if (playerTurn !== color) {
       return;
     }
@@ -72,6 +87,39 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
     }
   }
 
+  const pieceColor = useMemo(() => {
+    if (color === COLOR.RED) {
+      if (isSelected && !isDisabled) {
+        return "#990000"
+      }
+      if (isSelected && isDisabled) {
+        return "#994444"
+      }
+      if (!isSelected && !isDisabled) {
+        return "#ff0000"
+      }
+      if (!isSelected && isDisabled) {
+        return "#ff4444"
+      }
+    }
+    if (color === COLOR.BLUE) {
+      if (isSelected && !isDisabled) {
+        return "#000099"
+      }
+      if (isSelected && isDisabled) {
+        return "#444499"
+      }
+      if (!isSelected && !isDisabled) {
+        return "#0000ff"
+      }
+      if (!isSelected && isDisabled) {
+        return "#4444ff"
+      }
+    }
+    
+
+  } ,[isDisabled, isSelected])
+
 
   return (
     <group ref={groupRef}>
@@ -85,22 +133,14 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
       >
         <cylinderGeometry args={[0.4, 0.4, isKing ? 0.3 : 0.1, 32]} />
         <meshBasicMaterial
-          color={
-            isSelected
-              ? color === "RED"
-                ? 0x990000 // dark red
-                : 0x000099 // dark blue
-              : color === "RED"
-              ? 0xff0000 // normal red
-              : 0x0000ff // normal blue
-          }
+          color={pieceColor}
         />
       </mesh>
       
       {isKing && (
         <mesh position={[0, 0, 0.1]}>
           <torusGeometry args={[0.40, 0.05, 16, 100]} />
-          <meshStandardMaterial color="gold" />
+          <meshStandardMaterial color="gold"/>
         </mesh>
       )}
 

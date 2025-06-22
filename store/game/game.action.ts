@@ -86,10 +86,17 @@ function updateScores(jumpPieceValue: PieceType, capturedPieceValue : PieceType,
             console.error("NEW NEW SCORE CANNOT BE NaN")
             newScores = 0
         }
-        return {
-            red: currentPlayerColor === COLOR.RED ? newScores.toFixed(2) : scores.red,
-            blue: currentPlayerColor === COLOR.BLUE ? newScores.toFixed(2) : scores.blue,
+        const formattedScore = (score: number) => {
+            const r = math.format(score, { precision: 2 });
+            console.log({r})
+            return r;
         }
+        
+        return {
+            red: currentPlayerColor === COLOR.RED ? formattedScore(newScores) : scores.red,
+            blue: currentPlayerColor === COLOR.BLUE ? formattedScore(newScores) : scores.blue,
+        };
+        
     }
 
     throw new Error("unhandled game type.")

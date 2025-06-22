@@ -23,7 +23,8 @@ type GameStoreState = {
         red: string;
         blue: string;
     };
-    gameType: GAME_TYPE
+    gameType: GAME_TYPE;
+    pieceWithForceCapture: PieceType[];
 }
 
 export const authInitialState: GameStoreState = {
@@ -35,7 +36,8 @@ export const authInitialState: GameStoreState = {
         red: "0",
         blue: "0"
     },
-    gameType: GAME_TYPE.COUNTING
+    gameType: GAME_TYPE.COUNTING,
+    pieceWithForceCapture: []
 }
 
 
