@@ -14,15 +14,22 @@ export default function Board({children}:{children?:ReactNode}) {
 
   useEffect(() => {
     const pieceWithForceCapture : PieceType[]  = []
+    const pieceWithAvailableMoves : PieceType[] = [];
     for (const box of board.boxNodes) {
       if (!box.piece) continue;
-      const jumps = box.checkAvailableJumps(box.piece);
+      if (playerTurnColor !== box.piece.color) continue;
+      const jumps = box.checkAvailableJumps();
       if (jumps.length > 0) {
         pieceWithForceCapture.push(box.piece)
       }
+      const moves =  box.checkAvailableMoves();
+      if (moves.length > 0) {
+        pieceWithAvailableMoves.push(box.piece)
+      }
     }
     gameSelector.setState({
-      pieceWithForceCapture
+      pieceWithForceCapture,
+      currentPlayerNoMoreAvailableMoves: pieceWithAvailableMoves.length === 0 && pieceWithForceCapture.length === 0 
     })
       
   }, [playerTurnColor])

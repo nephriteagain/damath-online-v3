@@ -1,4 +1,4 @@
-import { Coordinates, PieceType, DIRECTION } from "@/types/game.types";
+import { Coordinates, PieceType, DIRECTION, Jump } from "@/types/game.types";
 import { COLOR,  OPERATION } from "./constants";
 
 export class BoxNode {
@@ -21,6 +21,12 @@ export class BoxNode {
       [DIRECTION.BR] : "br",
       [DIRECTION.TL] : "tl",
       [DIRECTION.TR] : "tr",
+    }
+
+    private static getDirectionsForExtraJumps(direction: DIRECTION) {
+      const directions = [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR] as const
+      const availableDirections = directions.filter(d => d !== direction)
+      return availableDirections
     }
 
     /* this functions setups the box connections */
@@ -95,63 +101,41 @@ export class BoxNode {
       return moves
     }
 
-    /** used for normal chips */
-    private checkJumps(box: BoxNode|null, jumps: {coordinates: Coordinates; pieceToCapture: PieceType}[], direction: DIRECTION) {
-      if (!this.piece) return;
-      // the box has no piece or
-      // the box piece has a same color piece next to it
-      if (!box?.piece || box.piece?.color ===  this.piece.color) {
+    private checkJumps(box: BoxNode|null, jumps: Jump[], direction: DIRECTION, visited = new Set<string>()) {
+      if (!this.piece) {
+        console.error("no piece found");
         return;
       }
-      const nextBox = box[BoxNode.d[direction]]
-      // the box has a piece of opposite color and the next box is empty
-      if (nextBox && nextBox.piece) {
-        jumps.push({
+      if (!box?.piece || box.piece?.color === this.piece.color) {
+        return;
+      }
+    
+      const coordKey = `${box.coordinates.x},${box.coordinates.y}`;
+      if (visited.has(coordKey)) return;
+      visited.add(coordKey);
+    
+      const nextBox = box[BoxNode.d[direction]];
+      if (nextBox && !nextBox.piece) {
+        const extraJumps: Jump[] = [];
+    
+        for (const dir of [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR]) {
+          if (dir !== direction) {
+            this.checkJumps(nextBox[BoxNode.d[dir]] ?? null, extraJumps, dir, new Set(visited));
+          }
+        }
+    
+        const jump = {
           pieceToCapture: box.piece,
-          coordinates: nextBox.coordinates
-        })
-      }
-
-
-    }
-
-    /** used for king pieces */
-    private checkAvailableMovesWithDirection() {
-      const currentPiece = this.piece;
-      if (!currentPiece) {
-        throw new Error("no current piece to move")
-      }
-      if (!currentPiece.isKing) {
-        throw new Error("Piece is not a King!")
-      }
-      const movesBL : Coordinates[] = []
-      const movesBR : Coordinates[] = []
-      const movesTL : Coordinates[] = []
-      const movesTR : Coordinates[] = []
-      this.checkMoveRecursive(this.bl ?? null, movesBL, DIRECTION.BL)
-      this.checkMoveRecursive(this.br ?? null, movesBR, DIRECTION.BR)
-      this.checkMoveRecursive(this.tl ?? null, movesTL, DIRECTION.TL)
-      this.checkMoveRecursive(this.tr ?? null, movesTR, DIRECTION.TR)
-      
-      return {
-        tl: movesTL,
-        tr: movesTR,
-        bl: movesBL,
-        br: movesBR
+          coordinates: nextBox.coordinates,
+          direction,
+          extraJumps
+        };
+        jumps.push(jump);
       }
     }
+    
 
-    private getAllFarthestMoves(moves: Coordinates[], direction: DIRECTION) : Coordinates|null {
-      if (direction === DIRECTION.TL || direction === DIRECTION.BL) {
-        moves.sort((m1, m2) => m1.x - m2.x)
-      }
-      if (direction === DIRECTION.TR || direction === DIRECTION.BR) {
-        moves.sort((m1, m2) => m2.x - m1.x)
-      }
-      return moves[0] ?? null;
-    }
-
-    private checkJumpsAsKing(initialBox: BoxNode, currentBox: BoxNode|null, jumpCoordinates: {coordinates:Coordinates, pieceToCapture:PieceType}[], pieceToCapture:PieceType|null, direction:DIRECTION) {
+    private checkJumpsAsKing(initialBox: BoxNode, currentBox: BoxNode|null, jumpCoordinates: Jump[], pieceToCapture:PieceType|null, direction:DIRECTION) {
       // react the edge of the box
       if (!currentBox) return;
 
@@ -178,28 +162,29 @@ export class BoxNode {
 
       // encountered a empty box after encountered a captureable piece
       if (!currentBox.piece && pieceToCapture) {
-        jumpCoordinates.push({coordinates: currentBox.coordinates, pieceToCapture})
+        jumpCoordinates.push({coordinates: currentBox.coordinates, pieceToCapture, direction})
         this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, pieceToCapture, direction)
         return;
       }
       
     }
 
-
-    checkAvailableJumps(piece?: PieceType) {
-      const jumps: {coordinates: Coordinates; pieceToCapture: PieceType;}[] = []
-      const currentPiece = piece ?? this.piece;
+    checkAvailableJumps() {
+      const jumps: Jump[] = []
+      const currentPiece = this.piece
       if (!currentPiece) {
         throw new Error("no current piece to jump")
       }
       // for normal piece
       if (!currentPiece.isKing) {
+        console.log("NORMAL JUMP")
         // single jump
         this.checkJumps(this.tl ?? null, jumps, DIRECTION.TL)
         this.checkJumps(this.tr ?? null, jumps, DIRECTION.TR)
         this.checkJumps(this.bl ?? null, jumps, DIRECTION.BL)
         this.checkJumps(this.br ?? null, jumps, DIRECTION.BR)
       } else {
+        console.log("KING JUMP")
         this.checkJumpsAsKing(this, this.tr ?? null, jumps, null, DIRECTION.TR)
         this.checkJumpsAsKing(this, this.tl ?? null, jumps, null, DIRECTION.TL)
         this.checkJumpsAsKing(this, this.br ?? null, jumps, null, DIRECTION.BR)
@@ -461,5 +446,29 @@ export class Board {
       throw new Error(`box coordinate not found, ${coordinates.x},${coordinates.y}`)
     }
     return box
+  }
+
+  public filterNestedJumps(jumps: Jump[]): Jump[] {
+    // Helper: recursively calculate the max depth of a jump
+    const getDepth = (jump: Jump): number => {
+      if (!jump.extraJumps || jump.extraJumps.length === 0) return 1;
+      return 1 + Math.max(...jump.extraJumps.map(getDepth));
+    };
+  
+    // Step 1: Map each jump to its depth
+    const jumpsWithDepth = jumps.map(jump => ({
+      jump,
+      depth: getDepth(jump)
+    }));
+
+    
+    // Step 2: Find the max depth
+    const maxDepth = Math.max(...jumpsWithDepth.map(j => j.depth));
+    console.log({maxDepth})
+  
+    // Step 3: Return only jumps with max depth
+    return jumpsWithDepth
+      .filter(j => j.depth === maxDepth)
+      .map(j => j.jump);
   }
 }

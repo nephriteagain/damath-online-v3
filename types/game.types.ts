@@ -24,3 +24,10 @@ export enum PIECE_ACTION {
     "MOVE",
     "JUMP"
 }
+
+export type Jump = {
+    coordinates: Coordinates; 
+    pieceToCapture: PieceType; 
+    direction: DIRECTION; 
+    extraJumps?: Jump[]
+}

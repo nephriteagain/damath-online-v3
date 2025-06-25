@@ -4,8 +4,6 @@ import { COLOR, BLUE_KING_COORDINATES, RED_KING_COORDINATES, GAME_TYPE, operatio
 import * as math from "mathjs"
 import { OPERATION } from "@/components/Box";
 
-window.math = math
-
 export function movePiece(coordinates: Coordinates, operation: OPERATION, capturedPiece?: PieceType) {
 
     const selectedPiece = gameSelector.getState().selectedPiece

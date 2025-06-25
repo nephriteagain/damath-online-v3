@@ -10,7 +10,6 @@ import {
   } from "@/components/ui/alert-dialog"
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom";
-import { useBoardContext } from "@/provider/BoardProvider";
 import { COLOR } from "@/lib/constants";
 import { gameSelector } from "@/store/game/game.store";
 
@@ -18,24 +17,30 @@ export default function GameOverDialog() {
     const [show, setShow] = useState(false)
     const [winner, setWinner] = useState<null|COLOR>(null)
 
-    const board = useBoardContext();
     const scores = gameSelector.use.scores();
+    const activePieces = gameSelector.use.activePieces();
+    const currentPlayerNoMoreAvailableMoves = gameSelector.use.currentPlayerNoMoreAvailableMoves()
   
     useEffect(() => {
-      const allRedPieceCaptured = board.boxNodes.every(box => box.piece?.color !== COLOR.RED)
-      const allBluePieceCaptured = board.boxNodes.every(box => box.piece?.color !== COLOR.BLUE)
-      if (allRedPieceCaptured || allBluePieceCaptured) {
+      const allRedPieceCaptured = activePieces.every(p => p?.color !== COLOR.RED)
+      const allBluePieceCaptured = activePieces.every(p => p?.color !== COLOR.BLUE)
+      if (allRedPieceCaptured || allBluePieceCaptured || currentPlayerNoMoreAvailableMoves) {
         setShow(true)
       }
-      if (scores.red > scores.blue) {
+      if (Number(scores.red) > Number(scores.blue)) {
         setWinner(COLOR.RED)
       }
-      else if (scores.blue < scores.red) {
+      else if (Number(scores.blue) < Number(scores.red)) {
         setWinner(COLOR.BLUE)
       } else {
         setWinner(null)
       }
-    }, [board])
+    }, [activePieces, currentPlayerNoMoreAvailableMoves])
+
+    useEffect(() => {
+      console.log({scores})
+      console.log({winner})
+    }, [winner])
 
     if (!document) {
         return null

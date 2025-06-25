@@ -25,11 +25,12 @@ type GameStoreState = {
     };
     gameType: GAME_TYPE;
     pieceWithForceCapture: PieceType[];
+    currentPlayerNoMoreAvailableMoves: boolean;
 }
 
 export const authInitialState: GameStoreState = {
     selectedPiece: null,
-    activePieces: initialCountingPieces.map(p => ({...p, isKing: true})),
+    activePieces: initialCountingPieces,
     selectedPieceAvailableActions: [],
     playerTurnColor: COLOR.RED,
     scores: {
@@ -37,7 +38,8 @@ export const authInitialState: GameStoreState = {
         blue: "0"
     },
     gameType: GAME_TYPE.COUNTING,
-    pieceWithForceCapture: []
+    pieceWithForceCapture: [],
+    currentPlayerNoMoreAvailableMoves: false
 }
 
 
