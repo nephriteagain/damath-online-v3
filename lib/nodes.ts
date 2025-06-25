@@ -101,6 +101,8 @@ export class BoxNode {
       return moves
     }
 
+    
+
     private checkJumps(box: BoxNode|null, jumps: Jump[], direction: DIRECTION, visited = new Set<string>()) {
       if (!this.piece) {
         console.error("no piece found");
@@ -119,9 +121,8 @@ export class BoxNode {
         const extraJumps: Jump[] = [];
     
         for (const dir of [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR]) {
-          if (dir !== direction) {
             this.checkJumps(nextBox[BoxNode.d[dir]] ?? null, extraJumps, dir, new Set(visited));
-          }
+          
         }
     
         const jump = {
@@ -169,6 +170,30 @@ export class BoxNode {
       
     }
 
+    private filterNestedJumps(jumps: Jump[]): Jump[] {
+      // Helper: recursively calculate the max depth of a jump
+      const getDepth = (jump: Jump): number => {
+        if (!jump.extraJumps || jump.extraJumps.length === 0) return 1;
+        return 1 + Math.max(...jump.extraJumps.map(getDepth));
+      };
+    
+      // Step 1: Map each jump to its depth
+      const jumpsWithDepth = jumps.map(jump => ({
+        jump,
+        depth: getDepth(jump)
+      }));
+  
+      
+      // Step 2: Find the max depth
+      const maxDepth = Math.max(...jumpsWithDepth.map(j => j.depth));
+      console.log({maxDepth})
+    
+      // Step 3: Return only jumps with max depth
+      return jumpsWithDepth
+        .filter(j => j.depth === maxDepth)
+        .map(j => j.jump);
+    }
+
     checkAvailableJumps() {
       const jumps: Jump[] = []
       const currentPiece = this.piece
@@ -190,7 +215,10 @@ export class BoxNode {
         this.checkJumpsAsKing(this, this.br ?? null, jumps, null, DIRECTION.BR)
         this.checkJumpsAsKing(this, this.bl ?? null, jumps, null, DIRECTION.BL)
       }
-      return jumps
+      // we only focus on the jump that yield the most pieces
+      const filteredJumps = this.filterNestedJumps(jumps)
+      console.log(filteredJumps.length, jumps.length)
+      return filteredJumps
     }
 }
 
@@ -448,27 +476,5 @@ export class Board {
     return box
   }
 
-  public filterNestedJumps(jumps: Jump[]): Jump[] {
-    // Helper: recursively calculate the max depth of a jump
-    const getDepth = (jump: Jump): number => {
-      if (!jump.extraJumps || jump.extraJumps.length === 0) return 1;
-      return 1 + Math.max(...jump.extraJumps.map(getDepth));
-    };
   
-    // Step 1: Map each jump to its depth
-    const jumpsWithDepth = jumps.map(jump => ({
-      jump,
-      depth: getDepth(jump)
-    }));
-
-    
-    // Step 2: Find the max depth
-    const maxDepth = Math.max(...jumpsWithDepth.map(j => j.depth));
-    console.log({maxDepth})
-  
-    // Step 3: Return only jumps with max depth
-    return jumpsWithDepth
-      .filter(j => j.depth === maxDepth)
-      .map(j => j.jump);
-  }
 }
