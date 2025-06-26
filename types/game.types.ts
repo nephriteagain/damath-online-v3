@@ -14,20 +14,37 @@ export type PieceType = {
 }
 
 export enum DIRECTION {
-    "TR",
-    "TL",
-    "BR",
-    "BL"
+    TR = "tr",
+    TL = "tl",
+    BR = "br",
+    BL = "bl"
 }
 
 export enum PIECE_ACTION {
-    "MOVE",
-    "JUMP"
+    MOVE = "MOVE",
+    JUMP = "JUMP"
 }
 
 export type Jump = {
     coordinates: Coordinates; 
+    pieceToJump: PieceType;
     pieceToCapture: PieceType; 
     direction: DIRECTION; 
     extraJumps?: Jump[]
 }
+
+export type Move = {
+    coordinates: Coordinates;
+    pieceToMove: PieceType;
+    direction: DIRECTION
+}
+
+export type JumpAction = {
+    type: PIECE_ACTION.JUMP
+} & Jump
+
+export type MoveAction = {
+    type: PIECE_ACTION.MOVE
+} & Move
+
+export type SelectedPieceAvailableActions = JumpAction|MoveAction

@@ -2,7 +2,7 @@ import createSelector from "../createSelector";
 import { create } from "zustand";
 import { getInitialPiecesToBoard } from "@/lib/utils";
 import { COLOR, COUNTING_PIECES, GAME_TYPE } from "@/lib/constants";
-import { Coordinates, PIECE_ACTION, PieceType } from "@/types/game.types";
+import { Coordinates, Jump, PIECE_ACTION, PieceType } from "@/types/game.types";
 
 const initialCountingPieces = getInitialPiecesToBoard(COUNTING_PIECES)
 
@@ -10,7 +10,8 @@ type SelectedPieceAvailableActions = {
     type: PIECE_ACTION;
     coordinates: Coordinates;
     pieceToCapture?: PieceType;
-    extraJumps?: SelectedPieceAvailableActions[];
+    pieceToJump?: PieceType;
+    extraJumps?: Jump[];
 }
 
 

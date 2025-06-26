@@ -146,12 +146,22 @@ export default function Box({ position, color, operation }: BoxProps) {
         // ignore invalid moves
         return;
       }
-      const capturedPiece = selectedPieceAvailableActions.find(p => p.coordinates.x === coordinates.x && p.coordinates.y === coordinates.y)?.pieceToCapture
+      const pieceAction = selectedPieceAvailableActions.find(p => p.coordinates.x === coordinates.x && p.coordinates.y === coordinates.y)
+      const capturedPiece = pieceAction?.pieceToCapture
+      const hasExtraJump = Array.isArray(pieceAction?.extraJumps) && pieceAction.extraJumps.length > 0
 
       if (capturedPiece) {
-        movePiece(coordinates, operation, capturedPiece)
+        movePiece({
+          coordinates,
+          capturedPiece,
+          operation,
+          hasExtraJump
+        })
       } else {
-        movePiece(coordinates, operation)
+        movePiece({
+          coordinates, 
+          operation
+        })
       }
   }
 

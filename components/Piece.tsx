@@ -75,16 +75,31 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
       const jumps = box.checkAvailableJumps();
       if (jumps.length > 0) {
         console.log("HAS JUMP")
-        console.log(jumps)
         gameSelector.setState({
           selectedPiece: pieceName,
-          selectedPieceAvailableActions: jumps.map(j => ({coordinates: j.coordinates, pieceToCapture: j.pieceToCapture, type: PIECE_ACTION.JUMP}))
+          selectedPieceAvailableActions: jumps.map(j => {
+            const action =  {
+            coordinates: j.coordinates, 
+            pieceToCapture: 
+            j.pieceToCapture, 
+            type: PIECE_ACTION.JUMP, 
+            pieceToJump: j.pieceToJump,
+            extraJumps: j.extraJumps,
+            direction: j.direction
+          }
+          return action
+        })
         })
         return
       }
       gameSelector.setState({ 
         selectedPiece: pieceName,
-        selectedPieceAvailableActions: moves.map(m => ({coordinates: m, type: PIECE_ACTION.MOVE})) 
+        selectedPieceAvailableActions: moves.map(m => ({
+          type: PIECE_ACTION.MOVE, 
+          coordinates: m.coordinates, 
+          pieceToMove: m.pieceToMove,
+          direction: m.direction
+        })) 
       });
     }
   }

@@ -4,7 +4,17 @@ import { COLOR, BLUE_KING_COORDINATES, RED_KING_COORDINATES, GAME_TYPE, operatio
 import * as math from "mathjs"
 import { OPERATION } from "@/components/Box";
 
-export function movePiece(coordinates: Coordinates, operation: OPERATION, capturedPiece?: PieceType) {
+export function movePiece({
+    coordinates,
+    operation,
+    capturedPiece,
+    hasExtraJump,
+}:{
+    coordinates: Coordinates, 
+    operation: OPERATION, 
+    capturedPiece?: PieceType, 
+    hasExtraJump?: boolean
+}) {
 
     const selectedPiece = gameSelector.getState().selectedPiece
     // no piece selected
@@ -30,7 +40,8 @@ export function movePiece(coordinates: Coordinates, operation: OPERATION, captur
                 ...p,
                 coordinates,
                 // if already king don't check
-                isKing: p.isKing ? p.isKing : checkAndPromoteNewKing(p, coordinates)
+                // don't promote yet if piece has extra jump
+                isKing: p.isKing ? p.isKing : hasExtraJump ? p.isKing : checkAndPromoteNewKing(p, coordinates)
             }
         }
         return p
@@ -40,12 +51,16 @@ export function movePiece(coordinates: Coordinates, operation: OPERATION, captur
     if (capturedPiece) {
         updatedPieces = updatedPieces.filter(p => p.pieceName !== capturedPiece.pieceName)
     }
+
+    if (hasExtraJump) {
+        console.log("HAS EXTRA JUMP")
+    }
     
     gameSelector.setState((state) => ({
         activePieces: updatedPieces,
         selectedPiece: null,
         selectedPieceAvailableActions: [],
-        playerTurnColor: state.playerTurnColor === COLOR.RED ? COLOR.BLUE : COLOR.RED,
+        playerTurnColor: hasExtraJump ? state.playerTurnColor :  state.playerTurnColor === COLOR.RED ? COLOR.BLUE : COLOR.RED,
         scores: capturedPiece ? updateScores(pieceObject, capturedPiece, operation, pieceObject.isKing): state.scores
     }))
 }
