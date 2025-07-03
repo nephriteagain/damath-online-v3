@@ -29,7 +29,7 @@ type GameStoreState = {
     currentPlayerNoMoreAvailableMoves: boolean;
 }
 
-export const authInitialState: GameStoreState = {
+export const gameInitialState: GameStoreState = {
     selectedPiece: null,
     activePieces: initialCountingPieces,
     selectedPieceAvailableActions: [],
@@ -46,7 +46,7 @@ export const authInitialState: GameStoreState = {
 
 const useGameStore = create<GameStoreState>()(
     () => ({
-      ...authInitialState,
+      ...gameInitialState,
     }),
   
 );

@@ -1,103 +1,58 @@
-import Image from "next/image";
+"use client";
+import Link from "next/link";
+import About from "@/components/About";
+import RuleModal from "@/components/RuleModal";
+import Local from "@/components/Local";
+import Progress from "@/components/Progress";
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { authSelector } from "@/store/auth.store.ts/auth.store";
+import UserMenu from "./components/UserMenu";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+export default function HomePage() {
+    const [start, setStart] = useState(false);
+    const user = authSelector.use.user();
+    const signInMethod = authSelector.use.signInMethod();
+
+    return (
+        <main className="flex min-h-screen flex-col items-center justify-center gap-6">
+            <div className="absolute top-4 right-4 flex flex-row gap-x-4">
+                {
+                    user ?
+                    <UserMenu displayName={user.displayName} uid={user.uid} signInMethod={signInMethod} /> :
+                    <Link href={"/auth"}>
+                    <Button>Sign In</Button>
+                </Link>
+                }
+            
+            </div>
+            <h1 className="text-3xl sm:text-5xl font-bold border-4 border-dashed p-4">
+                <span className="me-4 text-red-800">Damath</span>
+                <span className="text-blue-800">Online</span>
+            </h1>
+            <div className="w-[200px] flex flex-col items-center justify-center gap-4 p-2">
+                <Link
+                    href={"/lobby"}
+                    className="w-full text-center bg-primary text-white text-2xl rounded-md shadow-lg drop-shadow-lg px-4 py-1 hover:scale-105 hover:bg-secondary hover:shadow-md hover:drop-shadow-md active:scale-100 transition-all duration-150"
+                    onClick={() => setStart(true)}
+                >
+                    Lobbies
+                </Link>
+                <Local />
+                <Link
+                    href={"/watch"}
+                    className="w-full text-center mb-4 bg-primary text-white text-2xl rounded-md shadow-lg drop-shadow-lg px-4 py-1 hover:scale-105 hover:bg-secondary hover:shadow-md hover:drop-shadow-md active:scale-100 transition-all duration-150"
+                    onClick={() => setStart(true)}
+                >
+                    Watch
+                </Link>
+
+                <RuleModal />
+                <About />
+            </div>
+
+            <Progress start={start} />
+        </main>
+    );
 }
