@@ -212,12 +212,12 @@ export const BLUE_KING_COORDINATES = [
 ]
 
 export enum GAME_TYPE {
-  "COUNTING",
-  "WHOLE",
-  "INTEGER",
-  "FRACTION",
-  "RATIONAL",
-  "RADICAL"
+  COUNTING = "COUNTING",
+  WHOLE = "WHOLE",
+  INTEGER = "INTEGER",
+  FRACTION = "FRACTION",
+  RATIONAL = "RATIONAL",
+  RADICAL = "RADICAL",
 }
 
 export const operationToSymbol = {
@@ -226,3 +226,12 @@ export const operationToSymbol = {
   [OPERATION.MULTIPLY]: "*",
   [OPERATION.DIVIDE]: "/",
 }
+
+export const GAME_TYPE_ARR = [
+  GAME_TYPE.COUNTING,
+  GAME_TYPE.WHOLE,
+  GAME_TYPE.INTEGER,
+  GAME_TYPE.FRACTION,
+  GAME_TYPE.RATIONAL,
+  GAME_TYPE.RADICAL,
+]
