@@ -74,7 +74,7 @@ export function Room({room, setRoom}:{room: string|null; setRoom: Dispatch<SetSt
         </SheetHeader>
         <div className="pt-12 flex flex-col gap-y-3 px-4 h-full">
           <div className="flex flex-col gap-y-3">
-            <Input id="room-send-msg" className="bg-muted" />
+            <Input id="room-send-msg" className="bg-muted" placeholder="Send a message..." />
             <Button>Send</Button>
           </div>
           <div className="bg-accent rounded-md shadow-md  h-100 overflow-y-scroll p-2 flex flex-col gap-y-2">
