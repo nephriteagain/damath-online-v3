@@ -7,20 +7,19 @@ import Progress from "@/components/Progress";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { authSelector } from "@/store/auth.store.ts/auth.store";
+import { authSelector } from "@/store/auth/auth.store";
 import UserMenu from "./components/UserMenu";
 
 export default function HomePage() {
     const [start, setStart] = useState(false);
     const user = authSelector.use.user();
-    const signInMethod = authSelector.use.signInMethod();
 
     return (
         <main className="flex min-h-screen flex-col items-center justify-center gap-6">
             <div className="absolute top-4 right-4 flex flex-row gap-x-4">
                 {
                     user ?
-                    <UserMenu displayName={user.displayName} uid={user.uid} signInMethod={signInMethod} /> :
+                    <UserMenu displayName={user.displayName} uid={user.uid} isAnonymous={user.isAnonymous} /> :
                     <Link href={"/auth"}>
                     <Button>Sign In</Button>
                 </Link>

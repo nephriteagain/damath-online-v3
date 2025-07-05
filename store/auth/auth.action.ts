@@ -1,20 +1,16 @@
 import { auth } from "@/lib/firebase";
 import { GoogleAuthProvider, signInAnonymously, signInWithPopup, linkWithPopup, signOut } from "firebase/auth";
-import { authSelector } from "./auth.store";
 
 export async function signInUsingGoogle() {
     const provider = new GoogleAuthProvider();
     auth.useDeviceLanguage();
-    const result = await signInWithPopup(auth, provider)
-    const user = result.user
-    authSelector.setState({user, signInMethod: "google"})
+    await signInWithPopup(auth, provider)
+    return true;
 }
 
 export async function signInAsGuest() {
-    const result = await signInAnonymously(auth)
-    const user = result.user
-    authSelector.setState({user, signInMethod: "anonymous"})
-    return true
+    await signInAnonymously(auth)
+    return true;
 }
 
 export async function linkAnonymousUserWithGoogle() {
@@ -26,10 +22,9 @@ export async function linkAnonymousUserWithGoogle() {
       throw new Error("No anonymous user is currently signed in.");
     }
     try {
-      const result = await linkWithPopup(currentUser, provider);
-      const user = result.user;
-      authSelector.setState({ user, signInMethod: "google" });
+      await linkWithPopup(currentUser, provider);
       console.log("Anonymous account successfully linked to Google.");
+      return true
     } catch (error) {
       console.error("Failed to link anonymous account with Google:", error);
       throw error;

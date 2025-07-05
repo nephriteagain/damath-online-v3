@@ -235,3 +235,13 @@ export const GAME_TYPE_ARR = [
   GAME_TYPE.RATIONAL,
   GAME_TYPE.RADICAL,
 ]
+
+export enum COL {
+  ROOMS = "rooms",
+  ROOM_MESSAGES = "room_messages"
+}
+
+export enum ORDER_BY {
+  ASC = "asc",
+  DESC = "desc"
+};

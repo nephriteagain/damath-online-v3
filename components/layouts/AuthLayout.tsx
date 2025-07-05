@@ -1,6 +1,6 @@
 "use client"
 import { auth } from "@/lib/firebase"
-import { authSelector } from "@/store/auth.store.ts/auth.store"
+import { authSelector } from "@/store/auth/auth.store"
 import { onAuthStateChanged } from "firebase/auth"
 import { usePathname, useRouter } from "next/navigation"
 import { ReactNode, useEffect } from "react"
@@ -15,6 +15,9 @@ export default function AuthLayout({children}:{children: ReactNode}) {
             if (user) {
                 console.log("logged in successfully")
                 console.log(user)
+                authSelector.setState({
+                    user,
+                })
             } else {
                 console.log("user logged out")
             }
@@ -24,7 +27,6 @@ export default function AuthLayout({children}:{children: ReactNode}) {
             if (!user) {
                 authSelector.setState({
                     user: null,
-                    signInMethod: null
                 })
             }
         })

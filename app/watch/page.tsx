@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import GameTypeFilter from "@/components/GameTypeFilter"
-import LobbyTable from "@/components/LobbyList"
+import LobbyTable from "@/components/Lobby"
 import Link from "next/link"
 
 export default function WatchPage() {
@@ -14,7 +14,7 @@ export default function WatchPage() {
                     <GameTypeFilter />
                 </div>
                 <div className="flex flex-col flex-grow-1 bg-foreground justify-between pb-2 rounded-md shadow-md overflow-y-scroll">
-                    <LobbyTable />
+                    <LobbyTable rooms={[]} />
                     <Link href={"/"} className="self-center">
                         <Button variant={"link"}>Back to Home</Button>
                     </Link>

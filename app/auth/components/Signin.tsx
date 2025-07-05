@@ -9,14 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import {  useAsyncAction } from "@/hooks/useAsyncAction"
-import { linkAnonymousUserWithGoogle, signInAsGuest, signInUsingGoogle } from "@/store/auth.store.ts/auth.action"
-import { authSelector } from "@/store/auth.store.ts/auth.store"
+import { linkAnonymousUserWithGoogle, signInAsGuest, signInUsingGoogle } from "@/store/auth/auth.action"
+import { authSelector } from "@/store/auth/auth.store"
 import Link from "next/link"
 
 export default function SignIn() {
 
   const user = authSelector.use.user();
-  const signInMethod  =authSelector.use.signInMethod();
 
   const [signInAsGuestFn] = useAsyncAction(signInAsGuest)
 
@@ -25,7 +24,7 @@ export default function SignIn() {
       <CardHeader>
         <CardTitle>
           {
-            signInMethod === "anonymous" ?
+            user?.isAnonymous ?
             <>
             Complete you Signup
             </>:
@@ -36,7 +35,7 @@ export default function SignIn() {
           </CardTitle>
         <CardDescription>
           {
-            signInMethod === "anonymous" ?
+            user?.isAnonymous ?
             <>
             Complete your signup to personalize your account, sync it across devices, and keep your recent matches.</>:
             <>
@@ -53,7 +52,7 @@ export default function SignIn() {
         </CardAction>
       </CardHeader>
       <CardContent className="flex flex-col gap-y-4">
-        { user && signInMethod === "anonymous" &&
+        { user && user.isAnonymous &&
           <Button className="w-full" onClick={linkAnonymousUserWithGoogle}>
             Link you guest account to Google 
           </Button>

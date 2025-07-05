@@ -5,13 +5,11 @@ import { persist } from "zustand/middleware"
 
 export type AuthStoreState = {
     user: User|null,
-    signInMethod: "google" | "anonymous" | null
     
 }
 
 export const authInitialState : AuthStoreState = {
     user: null,
-    signInMethod: null
 }
 
 
