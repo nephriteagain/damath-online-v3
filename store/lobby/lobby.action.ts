@@ -1,4 +1,4 @@
-import { collection, doc, getDocs, limit, or, query, serverTimestamp, setDoc, Timestamp, where, onSnapshot, Unsubscribe, runTransaction, arrayUnion, orderBy } from "firebase/firestore"
+import { collection, doc, getDocs, limit, or, query, serverTimestamp, setDoc, Timestamp, where, onSnapshot, Unsubscribe, runTransaction, arrayUnion, orderBy, getDoc } from "firebase/firestore"
 import { authSelector } from "../auth/auth.store"
 import { firestore } from "@/lib/firebase"
 import { COL, GAME_TYPE } from "@/lib/constants"
@@ -278,7 +278,12 @@ export async function joinRoom(roomId: string) {
         
         return joinedRoom;
     })
-   
+    /**
+     * 
+    NOTE: we need this to prevent being auto kicked after joining
+    use on @see onJoinedRoomSnapshot function
+     */
+    await getDoc(roomRef)
     lobbySelector.setState({joinedRoom: transactionResult})
     
     return transactionResult;
