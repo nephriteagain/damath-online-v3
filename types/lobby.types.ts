@@ -1,5 +1,5 @@
 import { GAME_TYPE } from "@/lib/constants";
-import { CollectionReference, FieldValue, Timestamp } from "firebase/firestore";
+import { CollectionReference, DocumentReference, FieldValue, Timestamp } from "firebase/firestore";
 
 export interface lobbyMessage {
     sId: string;
@@ -26,7 +26,7 @@ export type RoomBase = {
     host: string;
     guest: string | null;
     gameType: GAME_TYPE;
-    gameStarted: boolean;
+    gameOngoing: boolean;
     roomId: string;
   };
   
@@ -39,6 +39,8 @@ export type RoomBase = {
       updatedAt: Timestamp;
       log: string;
     }[];
+    /** the current game will always be the last in the array */
+    games: DocumentReference[]
   };
   
   export type Room = RoomBase & {

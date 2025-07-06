@@ -1,4 +1,5 @@
-import { COLOR } from "@/lib/constants"
+import { COLOR, GAME_TYPE, OPERATION } from "@/lib/constants"
+import { CollectionReference, FieldValue, Timestamp } from "firebase/firestore";
 
 export type Coordinates = {
     x: number;
@@ -39,12 +40,66 @@ export type Move = {
     direction: DIRECTION
 }
 
-export type JumpAction = {
-    type: PIECE_ACTION.JUMP
-} & Jump
+// export type SelectedPieceAvailableActions = JumpAction|MoveAction
+type SelectedPieceAvailableActions = {
+    type: PIECE_ACTION;
+    coordinates: Coordinates;
+    pieceToCapture?: PieceType;
+    pieceToJump?: PieceType;
+    extraJumps?: Jump[];
+}
 
-export type MoveAction = {
-    type: PIECE_ACTION.MOVE
-} & Move
 
-export type SelectedPieceAvailableActions = JumpAction|MoveAction
+export type GameBase = {
+    activePieces: PieceType[];
+    playerTurnColor: COLOR;
+    scores: {
+      red: string;
+      blue: string;
+    };
+    gameType: GAME_TYPE;
+    isGameOver: boolean;
+    isGameForfeited: boolean;
+    /** null if local game */
+    gameId: string|null;
+    winner: COLOR|null;
+  };
+  
+  export type GameStoreState = GameBase & {
+    selectedPiece: string | null;
+    selectedPieceAvailableActions: SelectedPieceAvailableActions[];
+    pieceWithForceCapture: PieceType[];
+    currentPlayerNoMoreAvailableMoves: boolean;
+  };
+  
+  export type GameDoc = GameBase & {
+    createdAt: Timestamp | FieldValue;
+    updatedAt?: Timestamp | FieldValue;
+    playerColors: {
+      host: {
+        uid: string;
+        color: COLOR;
+      };
+      guest: {
+        uid: string;
+        color: COLOR;
+      };
+    };
+    endedAt?: Timestamp | FieldValue;
+    forfeitedBy?: string;
+    moveHistory: CollectionReference["path"];
+    messages: CollectionReference["path"];
+    roomId: string;
+  };
+  
+
+export type MoveHistoryDoc = {
+    createdAt: Timestamp|FieldValue;
+    move: Coordinates;
+    /** the score of the current move (not the total score) */
+    score: string;
+    piece: PieceType;
+    capturedPiece: PieceType|null;
+    operation: OPERATION|null;
+    moveId: string;
+}

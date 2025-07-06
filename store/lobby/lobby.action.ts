@@ -1,11 +1,13 @@
 import { collection, doc, getDocs, limit, or, query, serverTimestamp, setDoc, Timestamp, where, onSnapshot, Unsubscribe, runTransaction, arrayUnion, orderBy, getDoc } from "firebase/firestore"
 import { authSelector } from "../auth/auth.store"
 import { firestore } from "@/lib/firebase"
-import { COL, GAME_TYPE } from "@/lib/constants"
+import { COL, COLOR, GAME_TYPE } from "@/lib/constants"
 import { MESSAGE_TYPE, Room, RoomDoc, RoomMessage } from "@/types/lobby.types"
 import { capitalize } from "lodash"
 import { lobbySelector } from "./lobby.store"
 import { toast } from "sonner"
+import { getInitialPieces, getInitialPiecesToBoard } from "@/lib/utils"
+import { GameDoc } from "@/types/game.types"
 
 export async function createRoom(gameType: GAME_TYPE) {
     const user = authSelector.getState().user
@@ -34,13 +36,14 @@ export async function createRoom(gameType: GAME_TYPE) {
         host: user.uid,
         guest: null,
         gameType,
-        gameStarted: false,
+        gameOngoing: false,
         messages: roomMessageRef.path,
         createdAt: serverTimestamp(),   
         updateLogs: [{
             updatedAt: Timestamp.now(),
             log: `${user.uid} has created a ${gameType} room.`
-        }]
+        }],
+        games: []
     }
     await setDoc(newRoomRef,roomObject)
 
@@ -52,7 +55,7 @@ export async function createRoom(gameType: GAME_TYPE) {
             host: roomObject.host,
             guest: roomObject.guest,
             gameType: roomObject.gameType,
-            gameStarted: roomObject.gameStarted, 
+            gameOngoing: roomObject.gameOngoing, 
             messages: []
         }
     })
@@ -70,7 +73,7 @@ export function onRoomsSnapshot(filter?: GAME_TYPE|null) {
             host: d.host,
             guest: d.guest,
             gameType: d.gameType,
-            gameStarted: d.gameStarted,
+            gameOngoing: d.gameOngoing,
             roomId: d.roomId,
             messages: []
         }))
@@ -125,7 +128,7 @@ export function onJoinedRoomSnapshot(roomId :string) {
             const updatedRoom = {
                 name: data.name,
                 guest: data.guest,
-                gameStarted: data.gameStarted,
+                gameOngoing: data.gameOngoing,
                 gameType: data.gameType
             } as const
             console.log({updatedRoom})
@@ -272,7 +275,7 @@ export async function joinRoom(roomId: string) {
             host: room.host,
             guest: user.uid,
             gameType: room.gameType,
-            gameStarted: room.gameStarted,
+            gameOngoing: room.gameOngoing,
             messages: []
         }
         
@@ -364,4 +367,73 @@ export async function kickGuest(roomId: string) {
        return true
     })
     return transaction
+}
+
+export async function startGame(roomId: string) {
+    const roomRef = doc(firestore, COL.ROOMS, roomId)
+    const gameRef = doc(collection(firestore, COL.GAMES))
+    const moveHistoryRef = collection(gameRef, COL.MOVE_HISTORY)
+    const gameMessagesRef = collection(gameRef, COL.GAME_MESSAGES)
+
+    const transactionResult = await runTransaction(firestore, async t => {
+        const roomSnap = await t.get(roomRef)
+        const room = roomSnap.data() as RoomDoc|undefined;
+        if (!room) {
+            throw new Error("Room not found.")
+        }
+        if (!room.guest || !room.host) {
+            throw new Error("Room is not full")
+        }
+        if (room.gameOngoing) {
+            throw new Error("Game already started")
+        }
+        if (!room.gameType) {
+            throw new Error("Game type not set")
+        }
+        t.update(roomRef, {
+            gameOngoing: true,
+            updatedAt: serverTimestamp(),
+            updateLogs: arrayUnion({
+                updatedAt: Timestamp.now(),
+                log: `Game has started.`
+            }),
+            games: arrayUnion(gameRef)
+        })
+
+        const gameObject : GameDoc = {
+                gameId: gameRef.id,
+                createdAt: serverTimestamp(),
+                activePieces: getInitialPiecesToBoard(
+                    getInitialPieces(room.gameType)
+                ),
+                // simulate a flip of coin
+                playerTurnColor: Math.random() > 0.5 ? COLOR.RED : COLOR.BLUE,
+                playerColors: {
+                    host: {
+                        uid: room.host,
+                        color: COLOR.RED
+                    },
+                    guest: {
+                        uid: room.guest,
+                        color: COLOR.BLUE
+                    }
+                },
+                scores: {
+                    red: "0",
+                    blue: "0"
+                },
+                gameType: room.gameType,
+                isGameOver: false,
+                isGameForfeited: false,
+                moveHistory: moveHistoryRef.path,
+                messages: gameMessagesRef.path,
+                roomId: room.roomId,
+                winner: null,
+        }
+        
+
+        t.set(gameRef, gameObject)   
+    })
+
+    return transactionResult;
 }
