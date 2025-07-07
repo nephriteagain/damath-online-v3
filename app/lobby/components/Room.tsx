@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select"
 import { GAME_TYPE, GAME_TYPE_ARR } from "@/lib/constants";
 import { capitalize } from "lodash"
-import { leaveRoom, changeRoomGameType, sendRoomMessage, updateRoomName, kickGuest } from "@/store/lobby/lobby.action";
+import { leaveRoom, changeRoomGameType, sendRoomMessage, updateRoomName, kickGuest, startGame } from "@/store/lobby/lobby.action";
 import { Room } from "@/types/lobby.types";
 import { useAsyncStatus } from "@/hooks/useAsyncStatus";
 import { authSelector } from "@/store/auth/auth.store";
@@ -35,6 +35,7 @@ export default function RoomSheet({room}:{room: Room}) {
     const [sendRoomMessageFn, messageLoading] = useAsyncStatus(sendRoomMessage)
     const [updateRoomNameFn, updateRoomNameLoading] = useAsyncStatus(updateRoomName)
     const [kickGuessFn, kickGuessLoading] = useAsyncStatus(kickGuest)
+    const [startGameFn, startGameLoading] = useAsyncStatus(startGame)
 
     const [showScrollToBottom, setShowScrollToBottom] = useState(false)
     const user = authSelector.use.user();
@@ -234,7 +235,7 @@ export default function RoomSheet({room}:{room: Room}) {
           </div>
         </div>
         <SheetFooter className="flex-grow">
-          { user?.uid === room.host && <Button type="submit">Start Game</Button>}
+          { user?.uid === room.host && <Button onClick={() => startGameFn(room.roomId)} loading={startGameLoading}>Start Game</Button>}
           {/* <SheetClose asChild> */}
             <Button variant="destructive" onClick={()=> {
               console.log(room.roomId)

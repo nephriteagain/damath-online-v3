@@ -1,11 +1,14 @@
-import { Coordinates, GameDoc, MoveHistoryDoc, PieceType } from "@/types/game.types";
+import { Coordinates, GameDoc, MoveHistoryDoc, PieceType, Jump } from "@/types/game.types";
 import { gameSelector } from "./game.store";
 import { COLOR, BLUE_KING_COORDINATES, RED_KING_COORDINATES, GAME_TYPE, operationToSymbol, COL } from "@/lib/constants";
 import * as math from "mathjs"
 import { OPERATION } from "@/components/Box";
-import { collection, doc, DocumentReference, onSnapshot, Timestamp,  writeBatch } from "firebase/firestore";
+import { and, collection, doc, onSnapshot, or, query, Timestamp,  where,  writeBatch, orderBy, limit, runTransaction, serverTimestamp } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
-import { cloneDeep } from "lodash";
+import { cloneDeep,  } from "lodash";
+import { authSelector } from "../auth/auth.store";
+import { Board } from "@/lib/nodes";
+
 
 export async function movePiece({
     coordinates,
@@ -17,7 +20,7 @@ export async function movePiece({
     operation: OPERATION, 
     capturedPiece?: PieceType, 
     hasExtraJump?: boolean
-}, isOnline = false) {
+}) {
 
     const selectedPiece = gameSelector.getState().selectedPiece
     // no piece selected
@@ -71,6 +74,8 @@ export async function movePiece({
         playerTurnColor: hasExtraJump ? state.playerTurnColor :  state.playerTurnColor === COLOR.RED ? COLOR.BLUE : COLOR.RED,
         scores: capturedPiece ? updateScores(pieceObject, capturedPiece, operation, pieceObject.isKing): state.scores
     }))
+
+    const isOnline = gameSelector.getState().gameId
     if (isOnline) {
         const gameId = gameSelector.getState().gameId
         if (!gameId) throw new Error("game id not found!.")
@@ -175,26 +180,123 @@ function moveScore(jumpPieceValue: PieceType, capturedPieceValue : PieceType, op
 }
 
 /** listen's to game snapshots */
-export function onGameSnapshot(gameRef: DocumentReference) {
+export function onGameSnapshot(gameId: string) {
+    const gameRef = doc(firestore, COL.GAMES, gameId)
+
     const unsub = onSnapshot(gameRef, (snap) => {
         const gameDoc = snap.data() as GameDoc | undefined
         if (!gameDoc) {
             throw new Error("Game not found.")
         }
+        
         console.log("Updating game state...")
         gameSelector.setState({
             activePieces: gameDoc.activePieces,
             playerTurnColor: gameDoc.playerTurnColor,
             scores: gameDoc.scores,
             gameType: gameDoc.gameType,
+            pieceWithForceCapture:gameDoc.pieceWithForceCapture ?? [],
             isGameOver: gameDoc.isGameOver,
-            isGameForfeited: gameDoc.isGameForfeited
+            isGameForfeited: gameDoc.isGameForfeited,
+            gameId: gameDoc.gameId,
+            winner: gameDoc.winner,
         })
 
     })
-
     return unsub;
 }
+
+
+/** 
+ * check if the game is over
+ * NOTE: this should be a cloud function
+ * for now only host should run this
+ */
+export function onForceCaptureOrGameOverSnapshot(gameId: string) {
+    const gameRef = doc(firestore, COL.GAMES, gameId)
+
+    const unsub = onSnapshot(gameRef, (snap) => {
+        const user = authSelector.getState().user;
+        if (!user) {
+            console.warn("no user found -onGameOverSnapshot")
+            return;
+        }
+            
+        const gameDoc = snap.data() as GameDoc | undefined
+        if (!gameDoc) {
+            throw new Error("Game not found.")
+        }
+        
+        if (gameDoc.playerColors.host.uid !== user.uid) {
+            throw new Error("Only the host is allowed to run this function!")
+        }
+
+
+       console.log("checking for force move or if game is over...")
+        
+        // check if player has no more available moves
+        const board = new Board(gameDoc.activePieces)
+
+        const pieceWithForceCapture : PieceType[]  = []
+            const pieceWithAvailableMoves : PieceType[] = [];
+            const allJumps : Jump[][] = []
+            for (const box of board.boxNodes) {
+                if (!box.piece) continue;
+                if (gameDoc.playerTurnColor !== box.piece.color) continue;
+                const jumps = box.checkAvailableJumps();
+                if (jumps.length > 0) {
+                    allJumps.push(jumps)
+                }
+                const moves =  box.checkAvailableMoves();
+                if (moves.length > 0) {
+                    pieceWithAvailableMoves.push(box.piece)
+                }
+            }
+            const filteredJumps = board.filterNestedJumpsMatrix(allJumps)
+            for (const jumps of filteredJumps) {
+                for (const jump of jumps) {
+                    const alreadyAdded = pieceWithForceCapture.find(p => p.pieceName === jump.pieceToJump.pieceName)
+                    if (alreadyAdded) {
+                    continue;
+                    }
+                    pieceWithForceCapture.push(jump.pieceToJump)
+                }
+            }
+
+        const currentPlayerNoMoreAvailableMoves = pieceWithAvailableMoves.length === 0 && pieceWithForceCapture.length === 0 
+
+        // check if all the same color pieces are spent
+        const allRedPieceCaptured = gameDoc.activePieces.every(p => p?.color !== COLOR.RED)
+        const allBluePieceCaptured = gameDoc.activePieces.every(p => p?.color !== COLOR.BLUE)
+
+        runTransaction(firestore, async t => {
+            t.update(gameRef, {
+                pieceWithForceCapture
+            })
+            if (allRedPieceCaptured || allBluePieceCaptured || currentPlayerNoMoreAvailableMoves) {
+                t.update(gameRef, {
+                    isGameOver: true,
+                    endedAt: serverTimestamp()
+                })
+            }
+            if (Number(gameDoc.scores.red) > Number(gameDoc.scores.blue)) {
+                t.update(gameRef, {winner: COLOR.RED})
+            }
+            else if (Number(gameDoc.scores.blue) < Number(gameDoc.scores.red)) {
+                t.update(gameRef, {winner: COLOR.BLUE})
+                gameSelector.setState({winner: COLOR.BLUE})
+            } else {
+                t.update(gameRef, {winner: null})
+            }
+        })
+
+        
+       
+
+    })
+    return unsub;
+}
+
 
 type UpdateGameArgs = {
     gameId: string;
@@ -205,8 +307,7 @@ type UpdateGameArgs = {
         piece: PieceType;
         capturedPiece: PieceType | null;
         operation: OPERATION | null;
-    }
-    
+    } 
   };
   
   async function updateGame({
@@ -240,9 +341,66 @@ type UpdateGameArgs = {
       operation,
       moveId: moveRef.id
     };
-  
+    console.log("PLAYER MOVED.")
     batch.set(moveRef, moveObj);
     await batch.commit();
     return true;
   }
   
+
+  export function ongoingGameChecker(onChange: (roomId: string|null) => void) {
+    const user = authSelector.getState().user
+    if (!user) {
+        throw new Error("Cannot create lobby without user account.")
+    }
+
+    const gamesRef = collection(firestore, COL.GAMES)
+    const ongoingGameQ = query(gamesRef, 
+        and(
+            where("isGameOver", "==", false),
+            where("isGameForfeited", "==", false),
+            or(
+                where("playerColors.host.uid", "==", user.uid),
+                where("playerColors.guest.uid", "==", user.uid)
+            )
+        ),
+        orderBy("createdAt", "desc"),
+        limit(1)
+    );
+    const unsub = onSnapshot(ongoingGameQ, snap => {
+        const docs = snap.docs.map(d => d.data()) as GameDoc[]
+        if (docs.length === 0) {
+            console.log("no ongoing game found.")
+            onChange(null)
+            return;
+        }
+        const doc = docs[0];
+        const roomId = doc.gameId;
+        console.log("ongoing game found!")
+        onChange(roomId)
+    });
+    return unsub;
+  }
+
+  /** this is a function for exiting game safely after game has ended
+   *  different to "quitGame"
+   */
+  export async function exitGame(gameId: string) {
+    const gameRef = doc(firestore, COL.GAMES, gameId)
+    await runTransaction(firestore, async t => {
+        const gameSnap = await t.get(gameRef)
+        const gameDoc = gameSnap.data() as GameDoc|undefined;
+        if (!gameDoc) {
+            throw new Error("Game not found.")
+        }
+        const roomRef = doc(firestore, COL.ROOMS, gameDoc.roomId);
+        const roomSnap = await t.get(roomRef)
+        const roomDoc = roomSnap.data() as GameDoc|undefined;
+        if (!roomDoc) {
+            throw new Error("Room not found or already deleted.")
+        }
+        t.update(roomRef, {
+            gameOngoing: false
+        })
+    })
+  }

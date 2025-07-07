@@ -429,6 +429,7 @@ export async function startGame(roomId: string) {
                 messages: gameMessagesRef.path,
                 roomId: room.roomId,
                 winner: null,
+                pieceWithForceCapture: []
         }
         
 

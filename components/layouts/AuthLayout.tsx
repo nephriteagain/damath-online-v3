@@ -10,6 +10,8 @@ export default function AuthLayout({children}:{children: ReactNode}) {
     const path = usePathname()
     const router = useRouter()
 
+    
+
     useEffect(() => {
         const unsub = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -32,6 +34,7 @@ export default function AuthLayout({children}:{children: ReactNode}) {
         })
         return () => unsub()
     }, [])
+    
 
     return (
         <>

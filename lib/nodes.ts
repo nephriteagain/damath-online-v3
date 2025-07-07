@@ -121,11 +121,18 @@ export class BoxNode {
       // there is a opposite piece and  next box is empty
       const nextBox = box[direction];
       if (nextBox && !nextBox.piece) {
-        const extraJumps: Jump[] = [];
         // check for extra jump
-        for (const dir of [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR]) {
+        const extraJumps: Jump[] = [];
+        const directions = [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR]
+        const oppositeDirection = {
+          [DIRECTION.BL]: DIRECTION.TR,
+          [DIRECTION.BR]: DIRECTION.TL,
+          [DIRECTION.TL]: DIRECTION.BR,
+          [DIRECTION.TR]: DIRECTION.BL,
+        }
+        // cannot jump again on the opposite direction they just jumped into
+        for (const dir of directions.filter(d => d !== oppositeDirection[direction])) {
             this.checkJumps(nextBox[dir] ?? null, extraJumps, dir, new Set(visited));
-          
         }
         // save jump
         const jump = {
@@ -142,26 +149,14 @@ export class BoxNode {
 
     private checkJumpsAsKing(initialBox: BoxNode, currentBox: BoxNode|null, jumpCoordinates: Jump[], pieceToCapture:PieceType|null, direction:DIRECTION, visited = new Set<string>()) {
       // react the edge of the box
-      if (!currentBox) return;
+      if (!currentBox) {
+        console.log("edge")
+        return;
+      }
 
       // encountered a non empty box with same color piece
       if (currentBox.piece?.color === initialBox.piece?.color) {
-        return;
-      }
-
-      const nextBox = currentBox[direction] ?? null
-
-      // if encountered a empty box, with no pieceToCapture
-      // continue looking
-      if (!currentBox?.piece && !pieceToCapture) {
-        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, null, direction)
-        return;
-      }
-
-      // encountered a piece to capture
-      // for the first time
-      if (initialBox.piece?.color !== currentBox.piece?.color && !pieceToCapture) {
-        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, currentBox.piece, direction)
+        console.log("same color")
         return;
       }
 
@@ -170,12 +165,39 @@ export class BoxNode {
       if (visited.has(coordKey)) return;
       visited.add(coordKey);
 
+      const nextBox = currentBox[direction] ?? null
+
+      // if encountered a empty box, with no pieceToCapture
+      // continue looking
+      if (!currentBox?.piece && !pieceToCapture) {
+        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, null, direction, )
+        console.log("empty box")
+        return;
+      }
+
+      // encountered a piece to capture
+      // for the first time
+      if (initialBox.piece?.color !== currentBox.piece?.color && !pieceToCapture) {
+        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, currentBox.piece, direction, )
+        console.log("opponent piece found!")
+        return;
+      }
+
+
       // encountered a empty box after encountered a captureable piece
       if (!currentBox.piece && pieceToCapture) {
-        const extraJumps: Jump[] = [];
         // check for extra jump
-        for (const dir of [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR]) {
-            this.checkJumpsAsKing(initialBox,  currentBox[dir] ?? null, extraJumps, null,  dir, new Set(visited));
+        const extraJumps: Jump[] = [];
+        const directions = [DIRECTION.BL, DIRECTION.BR, DIRECTION.TL, DIRECTION.TR]
+        const oppositeDirection = {
+          [DIRECTION.BL]: DIRECTION.TR,
+          [DIRECTION.BR]: DIRECTION.TL,
+          [DIRECTION.TL]: DIRECTION.BR,
+          [DIRECTION.TR]: DIRECTION.BL,
+        }
+        // cannot jump again on the opposite direction they just jumped into
+        for (const dir of directions.filter(d => d !== oppositeDirection[direction])) {
+            this.checkJumpsAsKing(initialBox,  currentBox[dir] ?? null, extraJumps, null,  dir, new Set());
         }
 
         jumpCoordinates.push({
@@ -186,7 +208,8 @@ export class BoxNode {
           direction,
           extraJumps
         })
-        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, pieceToCapture, direction)
+        this.checkJumpsAsKing(initialBox, nextBox, jumpCoordinates, pieceToCapture, direction, )
+        console.log("piece captured")
         return;
       }
       

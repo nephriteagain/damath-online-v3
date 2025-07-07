@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { getInitialPiecesToBoard } from "@/lib/utils";
 import { COLOR, COUNTING_PIECES, GAME_TYPE } from "@/lib/constants";
 import { GameStoreState } from "@/types/game.types";
+import { devtools } from "zustand/middleware";
 
 const initialCountingPieces = getInitialPiecesToBoard(COUNTING_PIECES)
 
@@ -14,7 +15,7 @@ export const gameInitialState: GameStoreState = {
     activePieces: initialCountingPieces,
     selectedPieceAvailableActions: [],
     playerTurnColor: COLOR.RED,
-    scores: {
+    scores: {   
         red: "0",
         blue: "0"
     },
@@ -29,10 +30,10 @@ export const gameInitialState: GameStoreState = {
 
 
 const useGameStore = create<GameStoreState>()(
+    devtools(
     () => ({
       ...gameInitialState,
-    }),
-  
+    })),
 );
 
 export const gameSelector = createSelector(useGameStore);

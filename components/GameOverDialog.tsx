@@ -65,7 +65,7 @@ export default function GameOverDialog() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                     {/* <AlertDialogCancel onClick={() => setShowDialog(false)} >Cancel</AlertDialogCancel> */}
-                    <AlertDialogAction onClick={() => setShow(false)} >NEW GAME</AlertDialogAction>
+                    <AlertDialogAction onClick={() => setShow(false)} >Rematch</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>,

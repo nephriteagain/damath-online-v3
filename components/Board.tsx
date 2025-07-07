@@ -12,7 +12,7 @@ export default function Board({children}:{children?:ReactNode}) {
   const board = useBoardContext();
   const activePieces = gameSelector.use.activePieces();
 
-
+  // NOTE: this is redundant in online games
   useEffect(() => {
     const pieceWithForceCapture : PieceType[]  = []
     const pieceWithAvailableMoves : PieceType[] = [];

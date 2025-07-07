@@ -18,6 +18,8 @@ export default function LobbyPage() {
     const rooms = lobbySelector.use.rooms();
     const joinedRoom = lobbySelector.use.joinedRoom();
     const gameTypeFilter = lobbySelector.use.gameTypeFilter();
+    const onGoingGameId = lobbySelector.use.ongoingGameId()
+
     const [createRoomFn, isLoading] = useAsyncStatus(createRoom)
     const user =  authSelector.use.user();
     const router = useRouter();
@@ -39,6 +41,12 @@ export default function LobbyPage() {
             unsub()
         }
     }, [joinedRoom?.roomId])
+
+    useEffect(() => {
+        if (onGoingGameId) {
+            router.push(`/game/pvp-online`)
+        }
+    }, [onGoingGameId])
 
     
     return (

@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { BoardProvider } from "@/provider/BoardProvider";
 import AuthLayout from "@/components/layouts/AuthLayout";
+import ReconnectLayout from "@/components/layouts/ReconnectLayout";
 import { Toaster } from "@/components/ui/sonner"
 
 
@@ -28,16 +29,18 @@ export default function RootLayout({
 }>) {
   return (
     <AuthLayout>
-      <BoardProvider>
-        <html lang="en">
-          <body
-            className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-            >
-            {children}
-            <Toaster />
-          </body>
-        </html>
-        </BoardProvider>
+        <BoardProvider>
+          <html lang="en">
+            <body
+              className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+              >
+              <ReconnectLayout>
+              {children}
+              </ReconnectLayout>
+              <Toaster />
+            </body>
+          </html>
+          </BoardProvider>
       </AuthLayout>
   );
 }

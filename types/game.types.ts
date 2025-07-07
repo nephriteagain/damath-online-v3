@@ -63,12 +63,12 @@ export type GameBase = {
     /** null if local game */
     gameId: string|null;
     winner: COLOR|null;
+    pieceWithForceCapture: PieceType[];
   };
   
   export type GameStoreState = GameBase & {
     selectedPiece: string | null;
     selectedPieceAvailableActions: SelectedPieceAvailableActions[];
-    pieceWithForceCapture: PieceType[];
     currentPlayerNoMoreAvailableMoves: boolean;
   };
   
