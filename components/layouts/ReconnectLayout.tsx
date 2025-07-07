@@ -17,7 +17,8 @@ export default function ReconnectLayout({children}:{children: ReactNode}) {
             } 
             else if (currentOngoingId && change === null) {
                 // will trigger when there is an ongoing game, that is gameOver
-                toast("Click here to go back to lobby.", {
+                toast("Player has left the game.", {
+                    description: "Click here to go back to lobby.",
                     action: {
                         label: "Exit",
                         onClick: () => lobbySelector.setState({
