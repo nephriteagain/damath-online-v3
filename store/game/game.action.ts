@@ -424,6 +424,44 @@ type UpdateGameArgs = {
     })
   }
 
+  export async function quitGame(gameId: string) {
+    const user = authSelector.getState().user
+    if (!user) {
+        throw new Error("Cannot quit game without user account.")
+    }
+
+
+    const gameRef = doc(firestore, COL.GAMES, gameId)
+    await runTransaction(firestore, async t => {
+        const gameSnap = await t.get(gameRef)
+        const gameDoc = gameSnap.data() as GameDoc|undefined;
+        if (!gameDoc) {
+            throw new Error("Game not found.")
+        }
+        if (gameDoc.isGameOver) {
+            throw new Error("Game is over, leave game instead.")
+        }
+        if (gameDoc.isGameForfeited) {
+            throw new Error("Game is already forfeited.")
+        }
+
+        const roomRef = doc(firestore, COL.ROOMS, gameDoc.roomId);
+        const roomSnap = await t.get(roomRef)
+        const roomDoc = roomSnap.data() as GameDoc|undefined;
+        if (!roomDoc) {
+            throw new Error("Room not found or already deleted.")
+        }
+        t.update(roomRef, {
+            gameOngoing: false
+        })
+        t.update(gameRef, {
+            isGameForfeited: true,
+            forfeitedBy: user.uid,
+            endedAt: serverTimestamp()
+        })
+    })
+  }
+
 
   export async function sendGameMessage(gameId: string, text: string) {
     const user = authSelector.getState().user;

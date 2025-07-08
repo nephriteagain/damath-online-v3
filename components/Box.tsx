@@ -23,6 +23,11 @@ export default function Box({ position, color, operation }: BoxProps) {
   const selectedPieceAvailableActions = gameSelector.use.selectedPieceAvailableActions();
   const activePieces = gameSelector.use.activePieces();
 
+  //
+  const isGameOver = gameSelector.use.isGameOver();
+  const isGameForfeited = gameSelector.use.isGameForfeited();
+  //
+
   const coordinates = useMemo(() => {
     const p = COORDINATES_TO_POSITION.find(c => c.position[0] === position[0] && c.position[1] === position[1])
     if (!p) {
@@ -146,6 +151,12 @@ export default function Box({ position, color, operation }: BoxProps) {
         // ignore invalid moves
         return;
       }
+
+      if (isGameForfeited || isGameOver) {
+        // game is done
+        return
+      }
+
       const pieceAction = selectedPieceAvailableActions.find(p => p.coordinates.x === coordinates.x && p.coordinates.y === coordinates.y)
       const capturedPiece = pieceAction?.pieceToCapture
       const hasExtraJump = Array.isArray(pieceAction?.extraJumps) && pieceAction.extraJumps.length > 0

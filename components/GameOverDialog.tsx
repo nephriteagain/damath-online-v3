@@ -22,6 +22,8 @@ export default function GameOverDialog() {
     const isGameOver = gameSelector.use.isGameOver();
     const isGameForfeited = gameSelector.use.isGameForfeited();
     const winner = gameSelector.use.winner();
+
+    const gameId = gameSelector.use.gameId();
   
     // TODO: make game over to a cloud function
     useEffect(() => {
@@ -46,6 +48,13 @@ export default function GameOverDialog() {
         setShow(true)
       }
     }, [isGameOver, isGameForfeited])
+
+    /** we hide the modal if gameId changes */
+    useEffect(() => {
+      if (gameId) {
+        setShow(false)
+      }
+    }, [gameId])
 
     if (!document) {
         return null

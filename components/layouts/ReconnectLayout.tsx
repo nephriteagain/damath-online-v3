@@ -5,10 +5,12 @@ import { useEffect } from "react";
 import { ongoingGameChecker } from "@/store/game/game.action";
 import { toast } from "sonner";
 import { authSelector } from "@/store/auth/auth.store";
+import { useRouter } from "next/navigation";
 
 export default function ReconnectLayout({children}:{children: ReactNode}) {
 
     const user = authSelector.use.user();
+    const router = useRouter()
     
     useEffect(() => {
         if (!user) {
@@ -25,14 +27,18 @@ export default function ReconnectLayout({children}:{children: ReactNode}) {
             else if (currentOngoingId && change === null) {
                 // will trigger when there is an ongoing game, that is gameOver
                 toast("Player has left the game.", {
-                    description: "Click here to go back to lobby.",
                     action: {
                         label: "Exit",
-                        onClick: () => lobbySelector.setState({
+                        onClick: () => {
+                            console.log("exit clicked.")
+                            lobbySelector.setState({
                             ongoingGameId: null
-                        }),
+                        })
+                        router.push("/lobby")
+
                     },
-                    duration: Infinity,
+                    },
+                    duration: 10_000,
 
                 })
             }
