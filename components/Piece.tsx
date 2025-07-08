@@ -7,10 +7,11 @@ import { COLOR, COORDINATES_TO_POSITION } from "@/lib/constants";
 import { PIECE_ACTION, PieceType } from "@/types/game.types";
 import { Group } from "three";
 import { useBoardContext } from "@/provider/BoardProvider";
+import { authSelector } from "@/store/auth/auth.store";
 
-type PieceProps = ThreeElements["mesh"] & PieceType;
+type PieceProps = ThreeElements["mesh"] & PieceType & {isRotated?: boolean;};
 
-const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => {
+const Piece = ({ color, value, pieceName, coordinates, isKing, isRotated }: PieceProps) => {
   const meshRef = useRef<Mesh>(null);
   const groupRef = useRef<Group>(null);
 
@@ -27,6 +28,28 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
   const selectedPiece = gameSelector.use.selectedPiece();
   const playerTurn = gameSelector.use.playerTurnColor();
   const pieceWithForceCapture = gameSelector.use.pieceWithForceCapture();
+  const gameId = gameSelector.use.gameId();
+  const playerColors = gameSelector.use.playerColors();
+  const user = authSelector.use.user();
+
+  const isOnline = useMemo(() => gameId, [gameId])
+
+  const isOnlineUserPlayerTurn = useMemo(() => {
+    if (!isOnline) return false
+    if (!user) return false
+    const isHost = user.uid && playerColors?.host.uid === user.uid;
+    const isGuest = user.uid && playerColors?.guest.uid === user.uid;
+
+    if (isHost) {
+      const hostTurn = playerTurn === playerColors?.host.color
+      return hostTurn
+    }
+    if (isGuest) {
+      const guestTurn = playerTurn === playerColors?.guest.color
+      return guestTurn
+    }
+    return false
+  }, [isOnline, playerColors, user, playerTurn])
   
 
   if (!p) {
@@ -65,6 +88,11 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
       return;
     }
     if (playerTurn !== color) {
+      return;
+    }
+    // opponents turn
+    if (isOnline && !isOnlineUserPlayerTurn) {
+      alert("opponents turns")
       return;
     }
     if (isSelected) {
@@ -139,7 +167,7 @@ const Piece = ({ color, value, pieceName, coordinates, isKing }: PieceProps) => 
 
 
   return (
-    <group ref={groupRef}>
+    <group ref={groupRef} rotation={[0, 0, isRotated ? Math.PI : 0]}>
       <mesh
         ref={meshRef}
         rotation={[Math.PI / 2, 0, 0]}

@@ -4,10 +4,17 @@ import { lobbySelector } from "@/store/lobby/lobby.store";
 import { useEffect } from "react";
 import { ongoingGameChecker } from "@/store/game/game.action";
 import { toast } from "sonner";
+import { authSelector } from "@/store/auth/auth.store";
 
 export default function ReconnectLayout({children}:{children: ReactNode}) {
 
+    const user = authSelector.use.user();
+    
     useEffect(() => {
+        if (!user) {
+            return;
+        }
+
         const onChange = (change: string|null) => {
             const currentOngoingId = lobbySelector.getState().ongoingGameId
             if (!currentOngoingId) {
@@ -34,7 +41,7 @@ export default function ReconnectLayout({children}:{children: ReactNode}) {
         const unsub = ongoingGameChecker(onChange)
 
         return () => unsub();
-    }, [])
+    }, [user])
 
     return (
         <>

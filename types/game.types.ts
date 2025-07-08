@@ -64,6 +64,16 @@ export type GameBase = {
     gameId: string|null;
     winner: COLOR|null;
     pieceWithForceCapture: PieceType[];
+    playerColors: {
+      host: {
+        uid: string;
+        color: COLOR;
+      };
+      guest: {
+        uid: string;
+        color: COLOR;
+      };
+    } | null;
   };
   
   export type GameStoreState = GameBase & {
@@ -75,21 +85,13 @@ export type GameBase = {
   export type GameDoc = GameBase & {
     createdAt: Timestamp | FieldValue;
     updatedAt?: Timestamp | FieldValue;
-    playerColors: {
-      host: {
-        uid: string;
-        color: COLOR;
-      };
-      guest: {
-        uid: string;
-        color: COLOR;
-      };
-    };
+    playerColors: NonNullable<GameBase["playerColors"]>
     endedAt?: Timestamp | FieldValue;
     forfeitedBy?: string;
     moveHistory: CollectionReference["path"];
     messages: CollectionReference["path"];
     roomId: string;
+   
   };
   
 

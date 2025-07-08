@@ -5,7 +5,7 @@ import { gameSelector } from "@/store/game/game.store";
 import { useBoardContext } from "@/provider/BoardProvider";
 import { Jump, PieceType } from "@/types/game.types";
 
-export default function Board({children}:{children?:ReactNode}) {
+export default function Board({children, isRotated}:{children?:ReactNode; isRotated?: boolean;}) {
   const boardColor = 0x5a827e;
   const boxZ = 0.4
   const playerTurnColor = gameSelector.use.playerTurnColor();
@@ -49,22 +49,24 @@ export default function Board({children}:{children?:ReactNode}) {
 
   return (
     <>
-    <group name="board-group">
+    <group name="board-group" rotation={[0, 0, isRotated ? Math.PI : 0]}>
       {/* Board platform */}
-      <mesh position={[0, 0, 0]} name="board">
+      <mesh position={[0, 0, 0]} name="board" >
         <boxGeometry args={[8, 8, 0.5]} />
         <meshBasicMaterial color={boardColor} />
       </mesh>
 
       {/* Grid of boxes */}
-      {BOXES.map(({ x, y, color, operation }, index) => (
-        <Box
+      <group>
+        {BOXES.map(({ x, y, color, operation }, index) => (
+          <Box
           key={index}
           position={[x, y, boxZ]}
           color={color}
           operation={operation}
-        />
-      ))}
+          />
+        ))}
+      </group>
       {children}
     </group>
     </>

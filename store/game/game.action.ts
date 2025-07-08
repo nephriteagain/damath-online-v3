@@ -200,6 +200,7 @@ export function onGameSnapshot(gameId: string) {
             isGameForfeited: gameDoc.isGameForfeited,
             gameId: gameDoc.gameId,
             winner: gameDoc.winner,
+            playerColors: gameDoc.playerColors
         })
 
     })

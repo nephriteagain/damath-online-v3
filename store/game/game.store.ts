@@ -25,7 +25,8 @@ export const gameInitialState: GameStoreState = {
     isGameOver: false,
     isGameForfeited: false,
     gameId: null,
-    winner: null
+    winner: null,
+    playerColors: null
 }
 
 

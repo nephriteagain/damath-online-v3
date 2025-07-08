@@ -2,7 +2,7 @@
 
 import { Canvas,  useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import Board from "@/components/Board";
 import Coordinates from "@/components/Coordinates";
@@ -16,6 +16,7 @@ import Button from "@/components/Button";
 import Link from "next/link";
 import { authSelector } from "@/store/auth/auth.store";
 import { Unsubscribe } from "firebase/firestore";
+import { COLOR } from "@/lib/constants";
 
 export default function GamePage() {
 
@@ -75,19 +76,39 @@ function Scene() {
     }
   }, [ongoingGameId, user, joinedRoom])
 
+  const gameId = gameSelector.use.gameId();
+  const playerColors = gameSelector.use.playerColors();
+
+  /** we rotate the board when game is online and player is using blue chips */
+  const isRotated = useMemo(() => {
+    // this means game is not online
+    if (!gameId) return false;
+
+    const isHost = user && playerColors?.host.uid === user?.uid;
+    const isGuest = user && playerColors?.guest.uid === user?.uid;
+    if (isHost) {
+      return playerColors?.host.color === COLOR.BLUE
+    }
+    if (isGuest) {
+      return playerColors?.guest.color === COLOR.BLUE
+    }
+    return false
+
+  }, [gameId, user, playerColors])
+
 
 
   return (
     <>
     <ambientLight intensity={0.5} />
     <directionalLight castShadow position={[5, 5, 5]} />
-    <Board>
+    <Board isRotated={isRotated}>
     {/* Add pieces to board */}
-        <Coordinates />
-        <ScoreBoard />
+        <Coordinates isRotated={isRotated} />
+        <ScoreBoard isRotated={isRotated} />
         {
           activePieces.map(p => (
-            <Piece key={p.pieceName} {...p} />
+            <Piece key={p.pieceName} {...p} isRotated={isRotated} />
           ))
         }
     </Board>
