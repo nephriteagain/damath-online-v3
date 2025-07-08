@@ -3,11 +3,12 @@ import { gameSelector } from "./game.store";
 import { COLOR, BLUE_KING_COORDINATES, RED_KING_COORDINATES, GAME_TYPE, operationToSymbol, COL } from "@/lib/constants";
 import * as math from "mathjs"
 import { OPERATION } from "@/components/Box";
-import { and, collection, doc, onSnapshot, or, query, Timestamp,  where,  writeBatch, orderBy, limit, runTransaction, serverTimestamp } from "firebase/firestore";
+import { and, collection, doc, onSnapshot, or, query, Timestamp,  where,  writeBatch, orderBy, limit, runTransaction, serverTimestamp, setDoc, Unsubscribe } from "firebase/firestore";
 import { firestore } from "@/lib/firebase";
 import { cloneDeep,  } from "lodash";
 import { authSelector } from "../auth/auth.store";
 import { Board } from "@/lib/nodes";
+import { GameMessage, MESSAGE_TYPE } from "@/types/lobby.types";
 
 
 export async function movePiece({
@@ -183,7 +184,8 @@ function moveScore(jumpPieceValue: PieceType, capturedPieceValue : PieceType, op
 export function onGameSnapshot(gameId: string) {
     const gameRef = doc(firestore, COL.GAMES, gameId)
 
-    const unsub = onSnapshot(gameRef, (snap) => {
+    // listen to game changes
+    const gameUnsub = onSnapshot(gameRef, (snap) => {
         const gameDoc = snap.data() as GameDoc | undefined
         if (!gameDoc) {
             throw new Error("Game not found.")
@@ -204,6 +206,22 @@ export function onGameSnapshot(gameId: string) {
         })
 
     })
+
+    // listen to the game messages
+    const gameMessagesRef = collection(gameRef, COL.GAME_MESSAGES)
+    const gameMessagesQ = query(gameMessagesRef, orderBy("sentAt", "asc"))
+    const messagesUnsub = onSnapshot(gameMessagesQ, snap => {
+        const messages = snap.docs.map(d => d.data()) as GameMessage[];
+        gameSelector.setState({
+            messages
+        })
+    })
+
+    const unsub : Unsubscribe = () => {
+        gameUnsub();
+        messagesUnsub();
+    }
+
     return unsub;
 }
 
@@ -332,7 +350,7 @@ type UpdateGameArgs = {
       updatedAt: Timestamp.now(),
     });
   
-    const moveRef = doc(collection(firestore, COL.MOVE_HISTORY));
+    const moveRef = doc(collection(firestore, COL.GAMES, gameId, COL.MOVE_HISTORY));
     const moveObj: MoveHistoryDoc = {
       createdAt: Timestamp.now(),
       move,
@@ -405,3 +423,23 @@ type UpdateGameArgs = {
         })
     })
   }
+
+
+  export async function sendGameMessage(gameId: string, text: string) {
+    const user = authSelector.getState().user;
+    if (!user) {
+        throw new Error("Cannot send room message without user account.")
+    }
+    const gameRef = doc(firestore, COL.GAMES, gameId)
+    const gameMessagesRef = doc(collection(gameRef, COL.GAME_MESSAGES))
+    const messageObject : GameMessage = {
+        messageId: gameMessagesRef.id,
+        senderId: user.uid,
+        text,
+        sentAt: Timestamp.now(),
+        gameId,
+        messageType: MESSAGE_TYPE.GAME
+    }
+    await setDoc(gameMessagesRef, messageObject)
+    return true;
+}

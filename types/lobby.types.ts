@@ -62,4 +62,4 @@ export type RoomMessage = {
 export type GameMessage = {
     gameId: string;
     messageType: MESSAGE_TYPE.GAME
-}
+} & Message

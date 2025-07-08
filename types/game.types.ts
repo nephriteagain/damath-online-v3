@@ -1,5 +1,6 @@
 import { COLOR, GAME_TYPE, OPERATION } from "@/lib/constants"
 import { CollectionReference, FieldValue, Timestamp } from "firebase/firestore";
+import { GameMessage } from "./lobby.types";
 
 export type Coordinates = {
     x: number;
@@ -80,6 +81,7 @@ export type GameBase = {
     selectedPiece: string | null;
     selectedPieceAvailableActions: SelectedPieceAvailableActions[];
     currentPlayerNoMoreAvailableMoves: boolean;
+    messages: GameMessage[];
   };
   
   export type GameDoc = GameBase & {

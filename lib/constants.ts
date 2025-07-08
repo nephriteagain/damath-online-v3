@@ -376,7 +376,7 @@ export enum COL {
   ROOM_MESSAGES = "room_messages",
   GAMES = "games",
   MOVE_HISTORY = "move_history",
-  GAME_MESSAGES = "game_messages"
+  GAME_MESSAGES = "game_messages",
 }
 
 export enum ORDER_BY {

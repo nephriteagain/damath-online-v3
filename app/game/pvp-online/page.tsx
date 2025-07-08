@@ -1,7 +1,7 @@
 "use client";
 
 import { Canvas,  useThree } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+// import { OrbitControls } from "@react-three/drei";
 import { useEffect, useMemo } from "react";
 import * as THREE from "three";
 import Board from "@/components/Board";
@@ -17,6 +17,8 @@ import Link from "next/link";
 import { authSelector } from "@/store/auth/auth.store";
 import { Unsubscribe } from "firebase/firestore";
 import { COLOR } from "@/lib/constants";
+import GameSettings from "../components/GameSettings";
+import GameMessages from "../components/GameMessages";
 
 export default function GamePage() {
 
@@ -36,8 +38,12 @@ export default function GamePage() {
 
   return (
     <main className="flex flex-col items-center justify-center w-screen h-screen">
+      <div className="absolute z-10 top-4 right-4 flex flex-row gap-x-2">
+        <GameMessages />
+        <GameSettings />
+      </div>
       <GameOverDialog />
-      <Canvas shadows camera={{ position: [0, -0.5, 7], fov: 75 }}>
+      <Canvas shadows camera={{ position: [0, -0.5, 7.4], fov: 75 }}>
         <Scene />
       </Canvas>
     </main>
@@ -113,7 +119,7 @@ function Scene() {
         }
     </Board>
     {/* this will make the camera move */}
-    <OrbitControls />
+    {/* <OrbitControls /> */}
     </>
   );
 }

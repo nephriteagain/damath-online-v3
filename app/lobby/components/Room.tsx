@@ -174,67 +174,67 @@ export default function RoomSheet({room}:{room: Room}) {
           </div>
          
         </SheetHeader>
-        <div className="pt-12 flex flex-col gap-y-3 px-4 h-full">
-          <form className="flex flex-col gap-y-3" onSubmit={async(e) => {
-            e.preventDefault();
-            await sendRoomMessageFn(room.roomId, text)
-            setText("")
-            messagesRef.current?.scrollTo({
-              top: messagesRef.current.scrollHeight,
-              behavior: 'smooth'
-            });
-          }}>
-            <Input 
-            id="room-send-msg" 
-            className="bg-muted" 
-            placeholder="Send a message..." 
-            value={text} 
-            onChange={e =>setText(e.currentTarget.value)} 
-            disabled={messageLoading}
-            />
-            <Button loading={messageLoading} disabled={text.length === 0} >Send</Button>
-          </form>
-          <div className="relative">
-          <div className="bg-accent rounded-md shadow-md  h-75 overflow-y-scroll p-2 flex flex-col gap-y-2 pb-12" ref={messagesRef}>
-            {
-                room.messages.length > 0 ?
-                room.messages.map((message, index) => {
-                    if (message.senderId === user?.uid) {
-                        return (
-                            <div className="w-fit max-w-64 self-end px-2 py-1" key={index}>
-                                <p className="text-end">{message.text}</p>
-                                <p className="text-sm text-shadow-muted-foreground text-end">you</p>
-                            </div>
-                        )
-                    }    
-                    return (
-                        <div className="w-fit self-start px-2 py-1" key={index}>
-                            <p className="text-start">{message.text}</p>
-                            <p className="text-sm text-muted-foreground text-start">
-                              {message.senderId}
-                            </p>
-                        </div>
-                    )
-                }) :
-                <p>No messages yet.</p>
-            }
-            { showScrollToBottom && <Button
-             variant={"secondary"} 
-             className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-row items-center gap-x-1"
-             onClick={() => {
+        <SheetFooter className="flex-grow">
+          <div className="flex flex-col gap-y-3 py-8 h-full">
+            <form className="flex flex-col gap-y-3" onSubmit={async(e) => {
+              e.preventDefault();
+              await sendRoomMessageFn(room.roomId, text)
+              setText("")
               messagesRef.current?.scrollTo({
                 top: messagesRef.current.scrollHeight,
-                behavior: "smooth",
+                behavior: 'smooth'
               });
-             }}
-             >
-              <p className="text-sm">Scroll to bottom</p>
-              <ChevronDown className="w-4 h-4" />
-            </Button>}
+            }}>
+              <Input 
+              id="room-send-msg" 
+              className="bg-muted" 
+              placeholder="Send a message..." 
+              value={text} 
+              onChange={e =>setText(e.currentTarget.value)} 
+              disabled={messageLoading}
+              />
+              <Button loading={messageLoading} disabled={text.length === 0} >Send</Button>
+            </form>
+            <div className="relative">
+            <div className="bg-accent rounded-md shadow-md  h-75 overflow-y-scroll p-2 flex flex-col gap-y-2 pb-12" ref={messagesRef}>
+              {
+                  room.messages.length > 0 ?
+                  room.messages.map((message, index) => {
+                      if (message.senderId === user?.uid) {
+                          return (
+                              <div className="w-fit max-w-64 self-end px-2 py-1" key={index}>
+                                  <p className="text-end">{message.text}</p>
+                                  <p className="text-sm text-shadow-muted-foreground text-end">you</p>
+                              </div>
+                          )
+                      }    
+                      return (
+                          <div className="w-fit self-start px-2 py-1" key={index}>
+                              <p className="text-start">{message.text}</p>
+                              <p className="text-sm text-muted-foreground text-start">
+                                {message.senderId}
+                              </p>
+                          </div>
+                      )
+                  }) :
+                  <p>No messages yet.</p>
+              }
+              { showScrollToBottom && <Button
+              variant={"secondary"} 
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 flex flex-row items-center gap-x-1"
+              onClick={() => {
+                messagesRef.current?.scrollTo({
+                  top: messagesRef.current.scrollHeight,
+                  behavior: "smooth",
+                });
+              }}
+              >
+                <p className="text-sm">Scroll to bottom</p>
+                <ChevronDown className="w-4 h-4" />
+              </Button>}
+            </div>
+            </div>
           </div>
-          </div>
-        </div>
-        <SheetFooter className="flex-grow">
           { user?.uid === room.host && <Button onClick={() => startGameFn(room.roomId)} loading={startGameLoading}>Start Game</Button>}
           {/* <SheetClose asChild> */}
             <Button variant="destructive" onClick={()=> {
